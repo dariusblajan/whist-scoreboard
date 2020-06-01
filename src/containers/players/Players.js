@@ -20,17 +20,31 @@ const styles = createStyles(theme => ({
     actions: {
         marginTop: theme.spacing(10),
         display: 'flex',
+        height: 100,
         alignItems: 'center',
+        flexDirection: 'column',
         justifyContent: 'space-around'
     }
 }));
 
 const Players = props => {
-    const { classes, players, updatePlayer, addPlayer, deletePlayer, startGame, history } = props;
+    const {
+        classes,
+        players,
+        updatePlayer,
+        addPlayer,
+        deletePlayer,
+        startGame,
+        history,
+    } = props;
 
     const handleStartGame = () => {
         startGame();
         history.push('/game');
+    };
+
+    const handleGoBack = () => {
+        history.push('/');
     };
 
     const allPlayersHaveNames = players
@@ -41,7 +55,17 @@ const Players = props => {
         <div className={classes.playersView}>
             <Typography variant="h4" gutterBottom align="center">Add Players here</Typography>
             <div className={classes.playerList}>
-                { players.map((p, idx) => <Item key={idx} index={idx} player={p} handlePlayerChange={updatePlayer} handleRemovePlayer={deletePlayer}/>) }
+                {
+                    players.map((p, idx) =>
+                        <Item
+                            key={idx}
+                            index={idx}
+                            player={p}
+                            handlePlayerChange={updatePlayer}
+                            handleRemovePlayer={deletePlayer}
+                        />
+                    )
+                }
                 {
                     players.size < 6 &&
                     <Button
@@ -66,6 +90,13 @@ const Players = props => {
                         Play
                     </Button>
                 }
+                <Button
+                    color="secondary"
+                    variant="contained"
+                    onClick={handleGoBack}
+                >
+                    Back
+                </Button>
             </div>
         </div>
     );
@@ -73,7 +104,7 @@ const Players = props => {
 
 export default connect(
     state => ({
-        players: gameSelectors.getPlayers(state)
+        players: gameSelectors.getPlayers(state),
     }),
     dispatch => ({
         addPlayer() {
@@ -90,6 +121,9 @@ export default connect(
         },
         goTo(path) {
             dispatch(push(path));
+        },
+        setDealer(index) {
+            dispatch(gameActions.setDealer(index));
         },
         startGame() {
             dispatch(gameActions.startGame());

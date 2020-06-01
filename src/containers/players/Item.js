@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { createStyles, TextField, Typography, withStyles, IconButton } from '@material-ui/core';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+
+import { gameSelectors, gameActions } from '../../ducks';
+
+import {
+    createStyles,
+    TextField,
+    Typography,
+    withStyles,
+    IconButton,
+    FormControlLabel,
+    Checkbox
+} from '@material-ui/core';
 import * as icons from 'mdi-material-ui';
 
 const styles = createStyles(theme => ({
@@ -13,12 +26,14 @@ const styles = createStyles(theme => ({
 }));
 
 const Item = props => {
-    const { classes, player, handlePlayerChange, handleRemovePlayer, index } = props;
+    const { classes, player, handlePlayerChange, handleRemovePlayer, index, dealer, setDealer } = props;
     const [editing, setEditing] = useState(false);
 
     const handleChange = name => e => {
         handlePlayerChange(index, name, e.target.value);
     };
+
+    const handleChangeDealer = e => e.target.checked ? setDealer(index) : setDealer(0);
 
     return (
         <div className={classes.player}>
@@ -37,6 +52,11 @@ const Item = props => {
                     <Typography>
                         { player.get('name') }
                     </Typography>
+                    <FormControlLabel
+                        label="Dealer"
+                        control={<Checkbox checked={dealer === index}/>}
+                        onChange={handleChangeDealer}
+                    />
                     <IconButton onClick={() => setEditing(true)}>
                         <icons.Pencil/>
                     </IconButton>
@@ -46,4 +66,18 @@ const Item = props => {
     );
 };
 
-export default withStyles(styles)(Item);
+const enhance = compose(
+    withStyles(styles),
+    connect(
+        state => ({
+            dealer: gameSelectors.getDealer(state)
+        }),
+        dispatch => ({
+            setDealer(index) {
+                dispatch(gameActions.setDealer(index));
+            }
+        })
+    )
+);
+
+export default enhance(Item);

@@ -14,7 +14,9 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    Button
+    Button,
+    Tooltip,
+    Box
 } from '@material-ui/core';
 import { gameSelectors, gameActions } from '../../ducks';
 import { withRouter } from 'react-router-dom';
@@ -88,13 +90,6 @@ const styles = createStyles(theme => ({
     betCoin: {
         flex: '0 1 33.33%'
     },
-    topActions: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: theme.spacing(2),
-        marginBottom: theme.spacing(2)
-    }
 }));
 
 // TODO: prevent ending round if not all scores are in
@@ -111,8 +106,8 @@ const Game = props => {
         reopenRound,
         updateRound,
         firstPlayerIndex,
-        lastPlayerIndex,
         betSum,
+        dealer,
         setBettingPhase,
         resetRoundScore
     } = props;
@@ -120,11 +115,17 @@ const Game = props => {
     const [scoreDialogOpen, setScoreDialogOpen] = useState(false);
     const [bettingPlayer, setBettingPlayer] = useState(firstPlayerIndex);
     const [scoringPlayer, setScoringPlayer] = useState(firstPlayerIndex);
-    const unscoredPlayersNo = currentRound.get('scores').reduce((accum, data) => {
-        return accum + (!data.get('roundScore') ? 1 : 0);
+    const unscoredPlayersNo = currentRound.get('scores').reduce((acc, data) => {
+        return acc + (!data.get('scored') ? 1 : 0);
+    }, 0);
+    const lastUnscoredPlayerIndex = unscoredPlayersNo === 1 ? currentRound.get('scores').findIndex(x => !x.get('scored')) : -1;
+    const notBetPlayersNo = currentRound.get('scores').reduce((acc, data) => {
+        return acc + (!data.get('betIn') ? 1 : 0);
     }, 0);
     const possibleBets = [];
-    for (let i = 0; i <= currentRound.get('cards'); i++) possibleBets.push(i);
+    for (let i = 0; i <= currentRound.get('hands'); i++) possibleBets.push(i);
+    const allBetsIn = !currentRound.get('scores').find(x => x.get('betIn') === false);
+    const allScored = !currentRound.get('scores').find(x => x.get('scored') === false);
 
     const handleEndRound = () => {
         closeRound();
@@ -135,13 +136,11 @@ const Game = props => {
     };
 
     const handlePlayerBet = value => () => {
-
         updateRound(roundIndex, bettingPlayer, 'bet', +value);
         setDialogOpen(false);
     };
 
     const handlePlayerScore = value => () => {
-
         updateRound(roundIndex, scoringPlayer, 'currentScore', +value);
         setScoreDialogOpen(false);
     };
@@ -153,7 +152,7 @@ const Game = props => {
 
     const handleCloseScoreDialog = () => {
         setScoreDialogOpen(false);
-    }
+    };
 
     const handleOpenDialog = playerIdx => () => {
         setBettingPlayer(playerIdx);
@@ -170,7 +169,13 @@ const Game = props => {
 
     return (
         <div className={classes.tableContainer}>
-            <div className={classes.topActions}>
+            <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                padding={2}
+                marginBottom={2}
+            >
                 <Button
                     color="primary"
                     variant="contained"
@@ -184,19 +189,23 @@ const Game = props => {
                 >
                     <icons.Close /> End game
                 </Button>
-            </div>
+            </Box>
             <Table className={classes.table}>
                 <TableHead>
                     <TableRow>
-                        <TableCell padding="checkbox" align="center">#</TableCell>
+                        <TableCell padding="checkbox" align="center">
+                            <icons.MusicAccidentalSharp/>
+                        </TableCell>
                         {
                             players.map((player, i) => (
                                 <TableCell key={i} align="center">
-                                    { player.get('name') }
+                                    { player.get('name') + (dealer === i ? ' (dealer)' : '') }
                                 </TableCell>
                             ))
                         }
-                        <TableCell align="center" className={classes.actionsCell}><icons.Asterisk/></TableCell>
+                        <TableCell align="center" className={classes.actionsCell}>
+                            <icons.Asterisk fontSize="small"/>
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -212,7 +221,7 @@ const Game = props => {
                                         [classes.roundNo]: true
                                     })}
                                 >
-                                    { round.get('cards') }
+                                    { round.get('hands') }
                                 </TableCell>
                                 {
                                     round.get('scores').map((score, idx) => (
@@ -240,8 +249,16 @@ const Game = props => {
                                                         </IconButton>
                                                         : roundIndex >= i ? score.get('bet') : ''
                                                     }
-                                                    { score.get('prize') && roundIndex !== i && <icons.Plus className={classes.plusIcon}/> }
-                                                    { score.get('penalty') && roundIndex !== i && <icons.Minus className={classes.minusIcon}/> }
+                                                    {
+                                                        players.getIn([idx, 'prizes']).find(x => x === i)
+                                                        && roundIndex !== i
+                                                        && <icons.Plus className={classes.plusIcon}/>
+                                                    }
+                                                    {
+                                                        players.getIn([idx, 'penalities']).find(x => x === i)
+                                                        && roundIndex !== i
+                                                        && <icons.Minus className={classes.minusIcon}/>
+                                                    }
                                                 </span>
                                             </div>
                                         </TableCell>
@@ -249,32 +266,40 @@ const Game = props => {
                                 }
                                 <TableCell align="right">
                                     {
-                                        roundIndex === i &&
-                                        <IconButton size="small" onClick={handleSetBettingPhase(!round.get('bettingPhase'))}>
-                                            {
-                                                round.get('bettingPhase')
-                                                ? <icons.CashRemove/>
-                                                : <icons.CashPlus className={classes.prize}/>
-                                            }
-                                        </IconButton>
+                                        roundIndex === i && allBetsIn &&
+                                        <Tooltip title={round.get('bettingPhase') ? 'Close betting phase' : 'Reopen betting phase'}>
+                                            <IconButton size="small" onClick={handleSetBettingPhase(!round.get('bettingPhase'))}>
+                                                {
+                                                    round.get('bettingPhase')
+                                                    ? <icons.CashRemove/>
+                                                    : <icons.CashPlus className={classes.prize}/>
+                                                }
+                                            </IconButton>
+                                        </Tooltip>
                                     }
                                     {
-                                        roundIndex === i && !round.get('bettingPhase') && !round.get('pointsLeft') &&
-                                        <IconButton size="small" onClick={handleEndRound}>
-                                            <icons.Check className={classes.prize}/>
-                                        </IconButton>
+                                        roundIndex === i && !round.get('bettingPhase') && allScored &&
+                                        <Tooltip title="End round">
+                                            <IconButton size="small" onClick={handleEndRound}>
+                                                <icons.Check className={classes.prize}/>
+                                            </IconButton>
+                                        </Tooltip>
                                     }
                                     {
-                                        roundIndex === i && !round.get('bettingPhase') && round.get('pointsLeft') !== round.get('cards') &&
-                                        <IconButton size="small" onClick={resetRoundScore}>
-                                            <icons.Undo/>
-                                        </IconButton>
+                                        roundIndex === i && !round.get('bettingPhase') && round.get('handsLeft') !== round.get('hands') &&
+                                        <Tooltip title="Reset round">
+                                            <IconButton size="small" onClick={resetRoundScore}>
+                                                <icons.Undo/>
+                                            </IconButton>
+                                        </Tooltip>
                                     }
                                     {
                                         i < roundIndex &&
-                                        <IconButton size="small" onClick={handleReopen(i)}>
-                                            <icons.Refresh/>
-                                        </IconButton>
+                                        <Tooltip title="Reopen round">
+                                            <IconButton size="small" onClick={handleReopen(i)}>
+                                                <icons.Refresh/>
+                                            </IconButton>
+                                        </Tooltip>
                                     }
                                 </TableCell>
                             </TableRow>
@@ -295,7 +320,11 @@ const Game = props => {
                                 key={bet}
                                 onClick={handlePlayerBet(bet)}
                                 className={classes.betCoin}
-                                disabled={lastPlayerIndex === bettingPlayer && betSum + bet === currentRound.get('cards')}
+                                disabled={
+                                    bettingPlayer === dealer
+                                        ? (betSum + bet === currentRound.get('hands')) || notBetPlayersNo === players.size
+                                        : allBetsIn
+                                }
                             >
                                 { bet }
                             </IconButton>
@@ -308,18 +337,16 @@ const Game = props => {
                 onClose={handleCloseScoreDialog}
                 maxWidth="xs"
             >
-                <DialogTitle>Score</DialogTitle>
+                <DialogTitle>Score(hands taken)</DialogTitle>
                 <DialogContent className={classes.betList}>
                     {
                         possibleBets.map(bet => (
                             <IconButton
                                 key={bet}
                                 disabled={
-                                    unscoredPlayersNo === 1
-                                    ? currentRound.get('pointsLeft') < currentRound.get('cards')
-                                        && bet !== currentRound.get('pointsLeft')
-                                    : currentRound.get('pointsLeft') < currentRound.get('cards')
-                                        && bet > currentRound.get('pointsLeft')
+                                    scoringPlayer === lastUnscoredPlayerIndex // this is the last unscored player
+                                        ? bet !== currentRound.get('handsLeft')
+                                        : bet > currentRound.get('handsLeft')
                                 }
                                 onClick={handlePlayerScore(bet)}
                                 className={cn({
@@ -344,8 +371,8 @@ export default connect(
         roundIndex: gameSelectors.getRoundIndex(state),
         currentRound: gameSelectors.getCurrentRound(state),
         firstPlayerIndex: gameSelectors.getFirstPlayerIndex(state),
-        lastPlayerIndex: gameSelectors.getLastPlayerIndex(state),
-        betSum: gameSelectors.getBetSum(state)
+        betSum: gameSelectors.getBetSum(state),
+        dealer: gameSelectors.getDealer(state)
     }),
     dispatch => ({
         updatePlayer(index, key, value) {
