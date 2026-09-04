@@ -1,16 +1,36 @@
-# React + Vite
+# Whist Scoreboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A frontend-only PWA for keeping score during a game of Romanian whist.
+See [`docs/project-brief.md`](docs/project-brief.md) for the spec and
+[`docs/plans/`](docs/plans) for the iteration-by-iteration plan.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 + Vite 8
+- MUI (`@mui/material`) with `mdi-material-ui` icons
+- `react-router-dom` for screen routing
+- Vitest + Testing Library for tests
 
-## React Compiler
+## Develop
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+yarn install
+yarn dev          # start the dev server
+yarn test         # run the unit/component tests once
+yarn test:watch   # watch mode
+yarn coverage     # tests + coverage report
+yarn lint         # eslint
+yarn build        # production build to dist/
+```
 
-## Expanding the ESLint configuration
+## Layout
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+  rules/       pure, framework-free game engine (M1)
+  state/       game store + persistence (M2)
+  screens/     Home, NewGame, HandPlay, Scoreboard, GameOver
+  components/  shared UI (app shell, theme toggle)
+  theme/       MUI theme + light/dark mode provider
+  test/        Vitest setup + shared render helpers
+```
