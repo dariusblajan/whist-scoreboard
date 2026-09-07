@@ -10,8 +10,11 @@ React or touches the DOM or `localStorage`.
 
 ### `hands.js`
 
-- `generateHands(playerCount, variant, firstDealerSeatIndex) -> Hand[]`
-  - `playerCount`: 3–6 (throw on out-of-range).
+- `generateHands(players, variant, firstDealerSeatIndex) -> Hand[]`
+  - `players`: the `Player[]` (3–6, `seatIndex` 0..N-1; throw on out-of-range
+    count). Taken instead of a bare count so `entries` and `biddingOrder` are
+    keyed by / hold `Player.id` from the start — every consumer expects that.
+    The setup screen's sequence preview uses `cardsDealtSequence` directly.
   - `variant`: `'short'` | `'long'`.
   - **Short:** `N×1`, ramp `2..8`, `(N-1)×8`, ramp `7..2`, `N×1`.
   - **Long:** `N×8`, ramp `7..1`, `(N-1)×1`, ramp `2..7`, `N×8`.
@@ -129,9 +132,9 @@ Target: 100% branch coverage of `src/rules/`.
 
 ## Acceptance checklist
 
-- [ ] All rules functions implemented as pure functions, no side effects.
-- [ ] `yarn coverage` shows `src/rules/` at 100% (or documented exception).
-- [ ] The `game-rules.md` worked example is a passing test.
-- [ ] `promotionBonuses` covers made/missed streaks, 1-card resets, multiples of
+- [x] All rules functions implemented as pure functions, no side effects.
+- [x] `yarn coverage` shows `src/rules/` at 100% (statements/branches/functions).
+- [x] The `game-rules.md` worked example is a passing test.
+- [x] `promotionBonuses` covers made/missed streaks, 1-card resets, multiples of
       5, and the disabled case.
-- [ ] `yarn lint` clean.
+- [x] `yarn lint` clean.
