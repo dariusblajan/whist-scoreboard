@@ -12,3 +12,7 @@
 export { default as ThemeLightDark } from 'mdi-material-ui/esm/ThemeLightDark'
 export { default as WeatherNight } from 'mdi-material-ui/esm/WeatherNight'
 export { default as WhiteBalanceSunny } from 'mdi-material-ui/esm/WhiteBalanceSunny'
+export { default as ArrowUp } from 'mdi-material-ui/esm/ArrowUp'
+export { default as ArrowDown } from 'mdi-material-ui/esm/ArrowDown'
+export { default as Minus } from 'mdi-material-ui/esm/Minus'
+export { default as Plus } from 'mdi-material-ui/esm/Plus'
