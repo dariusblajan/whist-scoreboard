@@ -3,7 +3,9 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // Project site is served from https://dariusblajan.github.io/whist-scoreboard/
+  base: command === 'build' ? '/whist-scoreboard/' : '/',
   plugins: [react()],
   test: {
     environment: 'jsdom',
@@ -20,4 +22,4 @@ export default defineConfig({
       ],
     },
   },
-})
+}))

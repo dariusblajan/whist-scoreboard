@@ -5,7 +5,7 @@ import { AppRoutes } from './routes.jsx'
 function App() {
   return (
     <ThemeModeProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AppRoutes />
       </BrowserRouter>
     </ThemeModeProvider>
