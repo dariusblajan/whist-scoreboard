@@ -66,7 +66,8 @@ export function dealerForHand(handIndex, playerCount, firstDealerSeatIndex) {
 
 /**
  * Seat indices in bidding order for a dealer: the seat to the dealer's left
- * first, proceeding clockwise, dealer last.
+ * first, proceeding clockwise, dealer last. Private — callers and the stored
+ * `Hand.biddingOrder` field both go through `biddingOrder()`.
  * @param {number} dealerSeatIndex
  * @param {number} playerCount
  * @returns {number[]}
@@ -80,7 +81,10 @@ function seatBiddingOrder(dealerSeatIndex, playerCount) {
 }
 
 /**
- * Player ids in bidding order for a hand: dealer's left first, dealer last.
+ * Player ids in bidding order for a hand: the seat to the dealer's left first,
+ * proceeding clockwise, dealer last. This is the single source of truth — it
+ * populates `Hand.biddingOrder` at generation time and is the primitive to
+ * recompute after a seating change or back-edit.
  * @param {import('./types.js').Hand} hand
  * @param {import('./types.js').Player[]} players
  * @returns {Array<string|number>}
@@ -101,18 +105,18 @@ export function trumpStatus(cardsDealt) {
 }
 
 /**
- * Generate the full ordered hand list for a game. Player ids are seat indices
- * `0 .. playerCount - 1`; the game layer remaps them to real player ids.
- * @param {number} playerCount 3–6
+ * Generate the full ordered hand list for a game. `entries` is keyed by
+ * `Player.id` and `biddingOrder` holds `Player.id`s; `dealerSeatIndex` stays a
+ * seat index because the dealer is a rotating position, not a fixed person.
+ * @param {import('./types.js').Player[]} players 3–6 players, `seatIndex` 0..N-1
  * @param {'short'|'long'} variant
  * @param {number} firstDealerSeatIndex
  * @returns {import('./types.js').Hand[]}
  */
-export function generateHands(playerCount, variant, firstDealerSeatIndex) {
-  if (!Number.isInteger(playerCount) || playerCount < MIN_PLAYERS || playerCount > MAX_PLAYERS) {
-    throw new RangeError(
-      `playerCount must be an integer ${MIN_PLAYERS}-${MAX_PLAYERS}, got ${playerCount}`,
-    )
+export function generateHands(players, variant, firstDealerSeatIndex) {
+  const playerCount = players.length
+  if (playerCount < MIN_PLAYERS || playerCount > MAX_PLAYERS) {
+    throw new RangeError(`player count must be ${MIN_PLAYERS}-${MAX_PLAYERS}, got ${playerCount}`)
   }
   if (!VARIANTS.includes(variant)) {
     throw new RangeError(`variant must be one of ${VARIANTS.join(', ')}, got ${variant}`)
@@ -120,16 +124,9 @@ export function generateHands(playerCount, variant, firstDealerSeatIndex) {
   return cardsDealtSequence(playerCount, variant).map((cardsDealt, index) => {
     const dealerSeatIndex = dealerForHand(index, playerCount, firstDealerSeatIndex)
     const entries = {}
-    for (let seat = 0; seat < playerCount; seat += 1) {
-      entries[seat] = { bid: null, taken: null }
-    }
-    return {
-      index,
-      cardsDealt,
-      dealerSeatIndex,
-      biddingOrder: seatBiddingOrder(dealerSeatIndex, playerCount),
-      trump: null,
-      entries,
-    }
+    for (const player of players) entries[player.id] = { bid: null, taken: null }
+    const hand = { index, cardsDealt, dealerSeatIndex, biddingOrder: null, trump: null, entries }
+    hand.biddingOrder = biddingOrder(hand, players)
+    return hand
   })
 }

@@ -22,7 +22,7 @@
  * @property {number} index
  * @property {number} cardsDealt
  * @property {number} dealerSeatIndex
- * @property {Array<string|number>} biddingOrder   Player ids (or seat indices), dealer last.
+ * @property {Array<string|number>} biddingOrder   Player ids, dealer last.
  * @property {'none'|string|null} trump            null = not recorded.
  * @property {Object.<string, HandEntry>} entries  Keyed by player id.
  */
