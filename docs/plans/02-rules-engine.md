@@ -129,9 +129,9 @@ Target: 100% branch coverage of `src/rules/`.
 
 ## Acceptance checklist
 
-- [ ] All rules functions implemented as pure functions, no side effects.
-- [ ] `yarn coverage` shows `src/rules/` at 100% (or documented exception).
-- [ ] The `game-rules.md` worked example is a passing test.
-- [ ] `promotionBonuses` covers made/missed streaks, 1-card resets, multiples of
+- [x] All rules functions implemented as pure functions, no side effects.
+- [x] `yarn coverage` shows `src/rules/` at 100% (statements/branches/functions).
+- [x] The `game-rules.md` worked example is a passing test.
+- [x] `promotionBonuses` covers made/missed streaks, 1-card resets, multiples of
       5, and the disabled case.
-- [ ] `yarn lint` clean.
+- [x] `yarn lint` clean.
