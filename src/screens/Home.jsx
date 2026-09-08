@@ -9,6 +9,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import { useGameStore } from '../state/useGameStore.js'
+import { InstallButton } from '../pwa/InstallButton.jsx'
 
 export function Home() {
   const { game, stats, discardGame } = useGameStore()
@@ -53,6 +54,8 @@ export function Home() {
           New game
         </Button>
       )}
+
+      <InstallButton />
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Discard the game in progress?</DialogTitle>
