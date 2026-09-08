@@ -274,6 +274,8 @@ Keep this layer framework-free so it is trivially testable.
 | M3 | Scoreboard table view + back-edit with downstream recompute |
 | M4 | PWA shell: manifest, service worker, offline, installable |
 | M5 | Polish: wake lock, responsive pass, empty/error states, icons |
+| M6 | Printable / save-as-PDF score sheet (blank or filled) — *planned, not scheduled* |
+| M7 | Internationalization: translatable UI + English and Romanian — *planned, not scheduled* |
 
 ## 10. Resolved decisions
 
@@ -288,3 +290,14 @@ Keep this layer framework-free so it is trivially testable.
 
 Deferred to a possible later version: 7-player "dead hand", recording the
 trump suit.
+
+## 11. Later scope (planned, not yet scheduled)
+
+- **Printable scoreboard** — a print / save-as-PDF score sheet, either blank
+  (the correct hand grid to fill in on paper as a backup) or filled from the
+  live game. Pure print-CSS, no backend, offline-safe. See
+  [`plans/07-print-scoreboard.md`](plans/07-print-scoreboard.md).
+- **Internationalization** — all UI copy translatable; ship English (default)
+  and Romanian only, with a language switcher that auto-detects from the
+  browser on first run. No other languages, no RTL in this pass. See
+  [`plans/08-internationalization.md`](plans/08-internationalization.md).
