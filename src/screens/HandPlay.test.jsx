@@ -112,6 +112,51 @@ describe('HandPlay — finishing', () => {
   })
 })
 
+describe('HandPlay — back-edit', () => {
+  /** Seed a 3-player game with hands 0–3 fully played, sitting on hand 5. */
+  function seedFourPlayed() {
+    const game = buildGame(makeConfig())
+    for (let i = 0; i < 4; i += 1) {
+      for (const p of game.players) game.hands[i].entries[p.id] = { bid: 0, taken: 0 }
+      // put every trick on Player 1 so taken totals are valid
+      game.hands[i].entries.p0.taken = game.hands[i].cardsDealt
+    }
+    game.currentHandIndex = 5
+    seedGame(game)
+    return game
+  }
+
+  it('opens an earlier hand from the scoreboard and offers a way back', async () => {
+    const user = userEvent.setup()
+    seedFourPlayed()
+    renderApp({ route: '/play' })
+
+    await user.click(screen.getByRole('button', { name: 'Scoreboard' }))
+    await user.click(screen.getByTestId('hand-row-1'))
+
+    expect(screen.getByRole('heading', { name: /Hand 2 \// })).toBeInTheDocument()
+    const back = screen.getByRole('button', { name: /return to current hand/i })
+    await user.click(back)
+    expect(screen.getByRole('heading', { name: /Hand 5 \// })).toBeInTheDocument()
+  })
+
+  it('warns, without blocking, when an edit left a later dealer bid illegal', () => {
+    const game = buildGame(makeConfig())
+    const hi = game.hands.findIndex((h) => h.cardsDealt === 6)
+    const [b0, b1, dealer] = game.hands[hi].biddingOrder
+    game.hands[hi].entries[b0] = { bid: 3, taken: 0 }
+    game.hands[hi].entries[b1] = { bid: 1, taken: 0 }
+    game.hands[hi].entries[dealer] = { bid: 2, taken: 0 } // 3+1+2 == 6, forbidden
+    game.currentHandIndex = hi
+    seedGame(game)
+
+    renderApp({ route: '/play' })
+    expect(screen.getByText(/no longer legal after an earlier edit/i)).toBeInTheDocument()
+    // navigation is not blocked — the bid step still renders
+    expect(screen.getByRole('heading', { name: /Hand 8 \// })).toBeInTheDocument()
+  })
+})
+
 describe('HandPlay — input ergonomics', () => {
   it('renders no keyboard-raising control on either step', async () => {
     const user = userEvent.setup()

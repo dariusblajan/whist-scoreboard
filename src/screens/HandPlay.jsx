@@ -8,6 +8,7 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Alert from '@mui/material/Alert'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -17,7 +18,9 @@ import { Minus, Plus } from '../icons.js'
 import { useGameStore } from '../state/useGameStore.js'
 import {
   bidStepComplete,
+  dealerBidIllegal,
   dealerPlayer,
+  firstIncompleteHandIndex,
   forbiddenBid,
   handSummary,
   playerName,
@@ -57,10 +60,36 @@ function HandFlow({ store }) {
   const hand = game.hands[handIndex]
   const isLastHand = handIndex === game.hands.length - 1
   const dealer = dealerPlayer(game, hand)
+  const currentIndex = firstIncompleteHandIndex(game)
+  const editingEarlier = handIndex < currentIndex
 
   return (
     <Stack spacing={3}>
-      <HandHeader game={game} hand={hand} dealer={dealer} onEndEarly={() => setEndOpen(true)} />
+      <HandHeader
+        game={game}
+        hand={hand}
+        dealer={dealer}
+        onEndEarly={() => setEndOpen(true)}
+        onScoreboard={() => navigate('/scoreboard')}
+      />
+      {editingEarlier && (
+        <Alert
+          severity="info"
+          action={
+            <Button color="inherit" size="small" onClick={() => store.goToHand(currentIndex)}>
+              Return to current hand
+            </Button>
+          }
+        >
+          Editing hand {handIndex + 1}. Changes re-total every later hand.
+        </Alert>
+      )}
+      {dealerBidIllegal(hand) && (
+        <Alert severity="warning">
+          The dealer&apos;s bid here is no longer legal after an earlier edit. Re-open
+          the bids to fix it.
+        </Alert>
+      )}
       {phase === 'bid' && (
         <BidPhase
           game={game}
@@ -119,7 +148,7 @@ function HandFlow({ store }) {
   )
 }
 
-function HandHeader({ game, hand, dealer, onEndEarly }) {
+function HandHeader({ game, hand, dealer, onEndEarly, onScoreboard }) {
   const order = hand.biddingOrder.map((id) => playerName(game, id)).join(' → ')
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -127,9 +156,14 @@ function HandHeader({ game, hand, dealer, onEndEarly }) {
         <Typography variant="h6" component="h2">
           Hand {hand.index + 1} / {game.hands.length}
         </Typography>
-        <Button size="small" color="inherit" onClick={onEndEarly}>
-          End game early
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button size="small" color="inherit" onClick={onScoreboard}>
+            Scoreboard
+          </Button>
+          <Button size="small" color="inherit" onClick={onEndEarly}>
+            End game early
+          </Button>
+        </Box>
       </Box>
       <Typography color="text.secondary">
         {hand.cardsDealt} {hand.cardsDealt === 1 ? 'card' : 'cards'} ·{' '}
