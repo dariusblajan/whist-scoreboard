@@ -125,13 +125,27 @@ a reload. State persists on every mutation.
 
 ## Acceptance checklist
 
-- [ ] Full game playable start→finish on a phone-width viewport.
-- [ ] Reload at any point resumes with no data loss.
-- [ ] Forbidden dealer bid cannot be entered; reason shown.
-- [ ] Promotions toggle in setup; default OFF; stored on the game; when on, a
+- [x] Full game playable start→finish on a phone-width viewport.
+- [x] Reload at any point resumes with no data loss.
+- [x] Forbidden dealer bid cannot be entered; reason shown.
+- [x] Promotions toggle in setup; default OFF; stored on the game; when on, a
       landed ±10 bonus is shown in the per-hand summary and cumulative total.
-- [ ] "Next" gating on both steps matches the rules engine.
-- [ ] No on-screen keyboard anywhere except the Names step; each step
+- [x] "Next" gating on both steps matches the rules engine.
+- [x] No on-screen keyboard anywhere except the Names step; each step
       autofocuses its first control; a clean hand takes one tap per player per step.
-- [ ] Stats counters behave per the brief (early-end / discard don't count).
-- [ ] `yarn test` green, `yarn lint` clean, `yarn build` ok.
+- [x] Stats counters behave per the brief (early-end / discard don't count).
+- [x] `yarn test` green, `yarn lint` clean, `yarn build` ok.
+
+## Notes on the implementation
+
+- The state layer is split for fast-refresh hygiene (the lint rule forbids
+  mixing component and non-component exports in a `.jsx` file):
+  `gameReducer.js` (pure reducer + action creators + `createInitialState`),
+  `gameStoreContext.js` (the context object), `gameStore.jsx`
+  (`GameStoreProvider` + the persistence effect), `useGameStore.js` (the hook
+  with bound dispatchers). Derived selectors live in `selectors.js`.
+- `commitHand` currently only stamps `trump: 'none'` on 8-card hands; 1–7-card
+  hands keep `trump: null` unless the scorekeeper records a suit. Downstream
+  recompute on back-edit is M3.
+- A finished / ended-early game stays in `localStorage` as a read-only record
+  behind the Game Over screen; the setup wizard's **Start** replaces it.
