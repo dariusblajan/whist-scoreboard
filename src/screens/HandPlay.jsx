@@ -29,6 +29,7 @@ import {
 } from '../state/selectors.js'
 import { NumberPad } from '../components/NumberPad.jsx'
 import { BottomBar } from '../components/BottomBar.jsx'
+import { useWakeLock } from '../hooks/useWakeLock.js'
 
 const SUITS = [
   { value: 'spades', symbol: '♠' },
@@ -42,6 +43,9 @@ const OUTCOME_LABEL = { made: 'Made it', over: 'Over', under: 'Under' }
 export function HandPlay() {
   const store = useGameStore()
   const { game } = store
+
+  // Keep the screen awake for the whole game, not just one hand.
+  useWakeLock(Boolean(game) && game?.status !== 'complete')
 
   if (!game) return <Navigate to="/" replace />
   if (game.status === 'complete') return <Navigate to="/over" replace />
@@ -152,11 +156,11 @@ function HandHeader({ game, hand, dealer, onEndEarly, onScoreboard }) {
   const order = hand.biddingOrder.map((id) => playerName(game, id)).join(' → ')
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
         <Typography variant="h6" component="h2">
           Hand {hand.index + 1} / {game.hands.length}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
           <Button size="small" color="inherit" onClick={onScoreboard}>
             Scoreboard
           </Button>
@@ -205,7 +209,7 @@ function BidPhase({ game, hand, store, onBack, onNext }) {
               elevation={active ? 4 : 0}
               sx={{ p: 1.5 }}
             >
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography variant="subtitle2" component="p" gutterBottom>
                 {playerName(game, id)}
                 {isDealer ? ' (dealer, bids last)' : ''}
               </Typography>
@@ -268,7 +272,7 @@ function ResultPhase({ game, hand, store, onBack, onNext }) {
           const taken = hand.entries[p.id].taken ?? 0
           return (
             <Paper key={p.id} variant="outlined" sx={{ p: 1.5 }}>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography variant="subtitle2" component="p" gutterBottom>
                 {p.name} · bid {hand.entries[p.id].bid}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -302,7 +306,7 @@ function ResultPhase({ game, hand, store, onBack, onNext }) {
 
       {hand.cardsDealt !== 8 && (
         <Box>
-          <Typography variant="subtitle2" gutterBottom>
+          <Typography variant="subtitle2" component="p" gutterBottom>
             Trump suit (optional)
           </Typography>
           <ToggleButtonGroup
@@ -340,7 +344,7 @@ function SummaryPhase({ game, handIndex, onBack, onNext, isLastHand }) {
       <Stack spacing={1.5}>
         {rows.map((row) => (
           <Paper key={row.playerId} variant="outlined" sx={{ p: 1.5 }}>
-            <Typography variant="subtitle2">{playerName(game, row.playerId)}</Typography>
+            <Typography variant="subtitle2" component="p">{playerName(game, row.playerId)}</Typography>
             <Typography color="text.secondary">
               Bid {row.bid}, took {row.taken} — {OUTCOME_LABEL[row.outcome]} ·{' '}
               {row.points >= 0 ? `+${row.points}` : row.points} points

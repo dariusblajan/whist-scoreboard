@@ -16,6 +16,7 @@ export function Home() {
   const navigate = useNavigate()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const hasActiveGame = Boolean(game && game.status === 'active')
+  const firstRun = !hasActiveGame && stats.gamesPlayed === 0 && stats.gamesFinished === 0
 
   const startNew = () => {
     discardGame()
@@ -32,10 +33,17 @@ export function Home() {
         Keep score for a game of Romanian whist.
       </Typography>
 
-      <Stack direction="row" spacing={3}>
-        <Stat label="Games played" value={stats.gamesPlayed} />
-        <Stat label="Games finished" value={stats.gamesFinished} />
-      </Stack>
+      {firstRun ? (
+        <Typography color="text.secondary">
+          No games yet. Start a new one — pick the players, and it tracks every
+          bid, trick, and running total for you.
+        </Typography>
+      ) : (
+        <Stack direction="row" spacing={3}>
+          <Stat label="Games played" value={stats.gamesPlayed} />
+          <Stat label="Games finished" value={stats.gamesFinished} />
+        </Stack>
+      )}
 
       {hasActiveGame ? (
         <Stack spacing={1.5}>
@@ -78,7 +86,7 @@ export function Home() {
 function Stat({ label, value }) {
   return (
     <Stack>
-      <Typography variant="h5">{value}</Typography>
+      <Typography variant="h5" component="p">{value}</Typography>
       <Typography variant="caption" color="text.secondary">
         {label}
       </Typography>

@@ -176,7 +176,12 @@ export function NewGame() {
                   prev.map((row, j) => (j === i ? { ...row, name: e.target.value } : row)),
                 )
               }
-              slotProps={{ htmlInput: { enterKeyHint: 'next' } }}
+              slotProps={{
+                htmlInput: {
+                  enterKeyHint: i === roster.length - 1 ? 'done' : 'next',
+                  autoCapitalize: 'words',
+                },
+              }}
               fullWidth
             />
           ))}

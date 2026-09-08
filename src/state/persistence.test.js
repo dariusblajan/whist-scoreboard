@@ -1,29 +1,26 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   GAME_VERSION,
   clearGame,
+  consumeGameLoadError,
   loadGame,
   loadStats,
   saveGame,
   saveStats,
 } from './persistence.js'
+import { buildGame, makeConfig } from '../test/utils.jsx'
 
-const sampleGame = () => ({
-  id: 'g1',
-  players: [
-    { id: 'p0', name: 'A', seatIndex: 0 },
-    { id: 'p1', name: 'B', seatIndex: 1 },
-    { id: 'p2', name: 'C', seatIndex: 2 },
-  ],
-  variant: 'short',
-  options: { promotions: true },
-  firstDealerSeatIndex: 0,
-  hands: [{ index: 0, cardsDealt: 1, dealerSeatIndex: 0, biddingOrder: ['p1', 'p2', 'p0'], trump: null, entries: {} }],
-  currentHandIndex: 0,
-  status: 'active',
-})
+const sampleGame = () => {
+  const game = buildGame(makeConfig({ count: 3, promotions: true }))
+  return { ...game, id: 'g1' }
+}
 
 describe('persistence', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    consumeGameLoadError()
+  })
+
   it('round-trips a game including options.promotions', () => {
     const game = sampleGame()
     saveGame(game)
@@ -46,14 +43,42 @@ describe('persistence', () => {
     expect(loadGame().options).toEqual({ promotions: false })
   })
 
-  it('returns null for corrupt JSON', () => {
+  it('returns null for corrupt JSON and flags a load error', () => {
     localStorage.setItem('whist:game:v1', '{not json')
     expect(loadGame()).toBeNull()
+    expect(consumeGameLoadError()).toBe(true)
   })
 
   it('returns null for an unknown schema version', () => {
     localStorage.setItem('whist:game:v1', JSON.stringify({ version: 999, ...sampleGame() }))
     expect(loadGame()).toBeNull()
+  })
+
+  it('rejects a tampered player count / hand sequence and flags a load error', () => {
+    const game = sampleGame()
+    game.players.push({ id: 'p3', name: 'D', seatIndex: 3 }) // now 4 players, hands still a 3-player sequence
+    localStorage.setItem('whist:game:v1', JSON.stringify({ version: GAME_VERSION, ...game }))
+    expect(loadGame()).toBeNull()
+    expect(consumeGameLoadError()).toBe(true)
+  })
+
+  it('rejects an unknown variant', () => {
+    const game = sampleGame()
+    game.variant = 'medium'
+    localStorage.setItem('whist:game:v1', JSON.stringify({ version: GAME_VERSION, ...game }))
+    expect(loadGame()).toBeNull()
+  })
+
+  it('clamps an out-of-range currentHandIndex', () => {
+    const game = sampleGame()
+    game.currentHandIndex = 999
+    localStorage.setItem('whist:game:v1', JSON.stringify({ version: GAME_VERSION, ...game }))
+    expect(loadGame().currentHandIndex).toBe(game.hands.length - 1)
+  })
+
+  it('does not flag a load error when nothing is stored', () => {
+    expect(loadGame()).toBeNull()
+    expect(consumeGameLoadError()).toBe(false)
   })
 
   it('swallows localStorage failures on read and write', () => {
