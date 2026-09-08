@@ -41,6 +41,9 @@ export function Home() {
           <Button component={RouterLink} to="/play" variant="contained" size="large">
             Resume game
           </Button>
+          <Button component={RouterLink} to="/scoreboard" size="large">
+            View scoreboard
+          </Button>
           <Button onClick={() => setConfirmOpen(true)} size="large">
             New game
           </Button>

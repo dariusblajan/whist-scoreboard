@@ -85,6 +85,9 @@ export function gameReducer(state, action) {
     case 'commitHand': {
       if (!state.game) return state
       const hand = state.game.hands[action.handIndex]
+      // Bid/taken re-validation for an edited hand lives in the HandPlay flow
+      // (both steps gate "Next" on the per-hand selectors); downstream hands are
+      // never touched here — they re-total off the derived selectors.
       if (!hand || hand.trump != null || hand.cardsDealt !== 8) return state
       // 8-card hands are always no-trump; record it so the stored hand is complete.
       return { ...state, game: patchHand(state.game, action.handIndex, { trump: 'none' }) }
