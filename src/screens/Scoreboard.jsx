@@ -67,7 +67,7 @@ export function Scoreboard() {
               ))}
             </TableRow>
             <TableRow>
-              <TableCell sx={{ ...PINNED, top: '2rem', zIndex: 4 }} />
+              <TableCell component="td" aria-hidden sx={{ ...PINNED, top: '2rem', zIndex: 4 }} />
               {game.players.map((p) => [
                 <TableCell key={`${p.id}-b`} align="center" sx={{ top: '2rem' }}>
                   Bid

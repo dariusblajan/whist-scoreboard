@@ -1,13 +1,20 @@
 import { createTheme } from '@mui/material/styles'
 
-// Brand colours carried over from the original scaffold's theme.
+// Brand hues carried over from the original scaffold. `primary`/`secondary` are
+// only ever used as fills (with computed contrast text), so one value each is
+// fine. `success`/`error`/`warning` double as *text* colours on the page
+// background (hand summaries, promotion chips), so each scheme gets a shade
+// tuned to clear 4.5:1 against its paper — light needs darker, dark needs
+// lighter.
 const brand = {
   primary: '#00ADB5',
   secondary: '#F16623',
-  success: '#1BB99A',
-  error: '#FF5D48',
-  warning: '#F5A623',
   info: '#2F80ED',
+}
+
+const status = {
+  light: { success: '#0F7D68', error: '#C62121', warning: '#8A5A00' },
+  dark: { success: '#4FD6BB', error: '#FF8A7A', warning: '#F5B547' },
 }
 
 const shared = {
@@ -38,9 +45,9 @@ export function buildTheme(scheme) {
       mode: scheme,
       primary: { main: brand.primary },
       secondary: { main: brand.secondary },
-      success: { main: brand.success },
-      error: { main: brand.error },
-      warning: { main: brand.warning },
+      success: { main: status[scheme].success },
+      error: { main: status[scheme].error },
+      warning: { main: status[scheme].warning },
       info: { main: brand.info },
       ...(scheme === 'dark'
         ? { background: { default: '#16171d', paper: '#1f2028' } }

@@ -33,6 +33,23 @@ describe('Home', () => {
     expect(within(pad).getByRole('button', { name: '3' })).toHaveAttribute('aria-pressed', 'true')
   })
 
+  it('guards New game behind a discard confirmation when a game is in progress', async () => {
+    const user = userEvent.setup()
+    seedGame(buildGame(makeConfig()))
+    renderApp({ route: '/' })
+
+    await user.click(screen.getByRole('button', { name: /new game/i }))
+    expect(screen.getByRole('dialog')).toHaveTextContent(/discard the game in progress/i)
+
+    // Cancel is a no-op — still on Home, game still resumable.
+    await user.click(screen.getByRole('button', { name: /keep playing/i }))
+    expect(await screen.findByRole('link', { name: /resume/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /new game/i }))
+    await user.click(screen.getByRole('button', { name: /discard and start new/i }))
+    expect(screen.getByRole('heading', { name: /new game/i, level: 2 })).toBeInTheDocument()
+  })
+
   it('starting a new game increments gamesPlayed in persisted stats', async () => {
     const user = userEvent.setup()
     renderApp({ route: '/' })
