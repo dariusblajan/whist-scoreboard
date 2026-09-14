@@ -46,7 +46,7 @@ export function GameOver() {
           const t = tallies[row.playerId]
           return (
             <Paper key={row.playerId} variant="outlined" sx={{ p: 1.5 }}>
-              <Stack direction="row" justifyContent="space-between">
+              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography>
                   {rankLabel(row.rank, rankCounts[row.rank] > 1)} —{' '}
                   {playerName(game, row.playerId)}
@@ -65,6 +65,9 @@ export function GameOver() {
       </Stack>
       <Button variant="contained" size="large" onClick={() => setConfirmOpen(true)}>
         New game
+      </Button>
+      <Button size="large" onClick={() => navigate('/print')}>
+        Print / Save as PDF
       </Button>
       <Button size="large" onClick={() => navigate('/scoreboard')}>
         View scoreboard

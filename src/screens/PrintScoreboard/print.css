@@ -1,0 +1,99 @@
+/*
+ * Self-contained print-sheet layout: black-on-white, no theme tokens, so it
+ * stays legible regardless of the app's light/dark mode. `thead` repeats on
+ * every printed page via `display: table-header-group`; `@page` and the
+ * condensed variant keep 3-6 players fitting A4 and US Letter portrait.
+ */
+
+.print-sheet {
+  background: #fff;
+  color: #000;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.print-sheet__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.print-sheet__toolbar button {
+  font: inherit;
+  padding: 8px 16px;
+  border: 1px solid #000;
+  border-radius: 4px;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+.print-sheet__title {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+}
+
+.print-sheet__meta {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.print-sheet__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
+.print-sheet__table th,
+.print-sheet__table td {
+  border: 1px solid #000;
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.print-sheet__table thead {
+  display: table-header-group;
+}
+
+.print-sheet__table tfoot {
+  display: table-footer-group;
+  font-weight: bold;
+}
+
+.print-sheet__table tbody tr {
+  break-inside: avoid;
+  height: 9mm;
+}
+
+.print-sheet__table tr.print-sheet__separator td {
+  border-top: 2px solid #000;
+}
+
+.print-sheet__standings {
+  margin-top: 16px;
+  break-inside: avoid;
+}
+
+/* 6-player sheets are the tightest fit — condense the type a step. */
+.print-sheet--condensed .print-sheet__table {
+  font-size: 0.7rem;
+}
+
+@media print {
+  @page {
+    size: portrait;
+    margin: 10mm;
+  }
+
+  .print-sheet__toolbar {
+    display: none;
+  }
+
+  .print-sheet {
+    padding: 0;
+  }
+}

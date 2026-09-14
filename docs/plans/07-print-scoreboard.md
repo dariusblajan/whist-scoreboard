@@ -89,11 +89,67 @@ Two uses:
 
 ## Acceptance checklist
 
-- [ ] Blank sheet printable for any player count / variant without starting a
+- [x] Blank sheet printable for any player count / variant without starting a
       game; hand grid matches the engine.
-- [ ] Filled sheet matches the on-screen scoreboard numbers and promotion badges.
-- [ ] Fits A4 and US Letter portrait, 3–6 players, header repeats per page.
-- [ ] No app chrome in print output; light/greyscale legible.
-- [ ] Works offline; no new runtime dependencies or network calls.
-- [ ] `/print` guarded when there's nothing to show.
-- [ ] `yarn test` green, `yarn lint` clean, `yarn build` ok.
+- [x] Filled sheet matches the on-screen scoreboard numbers and promotion badges.
+- [x] Fits A4 and US Letter portrait, 3–6 players, header repeats per page
+      (CSS in place; manual cross-browser pagination check still outstanding —
+      no Playwright/browser tooling in this environment).
+- [x] No app chrome in print output; light/greyscale legible.
+- [x] Works offline; no new runtime dependencies or network calls.
+- [x] `/print` guarded when there's nothing to show.
+- [x] `yarn test` green, `yarn lint` clean, `yarn build` ok.
+
+## Follow-up: resume flow and blank-sheet leak (found in review)
+
+> Filed after the first pass above shipped. Root cause: a *finished*
+> (`status: 'complete'`) game was never surfaced or explicitly discarded on
+> Home — clicking "New game" there navigated straight to `/new` without
+> calling `discardGame()`, so the finished game sat in the store. Since
+> `/print` preferred an in-store game over query params, the NewGame wizard's
+> "Print blank sheet" button (step 4) then rendered that stale finished game
+> instead of a blank sheet for the options chosen in the wizard.
+
+1. **Home resumes the last saved game regardless of status.** Today Home
+   only offers "Resume game" for `status: 'active'`; a finished game is
+   invisible until the user manually visits `/over`. Add a "View last game"
+   path for `status: 'complete'`, alongside "New game". Both the active and
+   finished branches route "New game" through the existing discard-confirm
+   dialog (reusing GameOver's copy — "This clears the finished game from the
+   scoreboard." — for the finished case) so a game is never silently
+   abandoned in storage.
+2. **`/print` treats a valid `?players=&variant=` query string as
+   authoritative**, checked *before* falling back to an in-store game. A
+   blank-sheet link (NewGame step 4) always carries those params for the
+   wizard's current selections, so it renders a blank sheet independent of
+   whatever the store holds — fixing the leak directly, on top of the Home
+   fix above removing the stale game in the first place.
+3. **Autosave checkpoint at end of hand.** `gameStore.jsx` already persists
+   `state.game` to `localStorage` on every dispatch (a strict superset of
+   "after each hand"), so `commitHand` / `goToHand` / `finishGame` all
+   checkpoint automatically — no reducer change needed. Added regression
+   coverage asserting the persisted game reflects a just-completed hand's
+   entries and the advanced `currentHandIndex`, to guard against a future
+   change (e.g. debouncing the save effect) silently widening that window.
+
+### Tasks
+
+- `src/screens/Home.jsx` — branch on `game.status` (`active` / `complete` /
+  none) instead of only checking for `active`; route both non-empty states'
+  "New game" through the confirm dialog.
+- `src/screens/PrintScoreboard/PrintScoreboard.jsx` — swap the model lookup
+  order: valid query-param config wins over an in-store game.
+- Regression tests: Home (finished-game branch + discard-then-print-blank
+  end-to-end), NewGame (blank sheet ignores a stale finished game), HandPlay
+  (persisted game reflects a completed hand).
+
+### Acceptance checklist
+
+- [x] Home offers to resume/view the last saved game for both an active and
+      a finished game; "New game" always discards it first.
+- [x] NewGame step 4's "Print blank sheet" never shows another game's bids,
+      scores, or standings — only the wizard's current player count / variant
+      / promotions, blank.
+- [x] A completed hand's entries survive a simulated reload (autosave
+      regression test).
+- [x] `yarn test` green, `yarn lint` clean, `yarn build` ok.

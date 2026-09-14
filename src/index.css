@@ -20,3 +20,30 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Safety net for a browser Print triggered from inside the app shell (e.g.
+ * Ctrl+P on the Scoreboard) rather than via the dedicated `/print` route:
+ * hide the app-bar/bottom-bar chrome, drop to a plain light palette, and
+ * avoid splitting a table row across a page break.
+ */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  * {
+    box-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+}

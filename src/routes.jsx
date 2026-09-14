@@ -5,10 +5,13 @@ import { NewGame } from './screens/NewGame.jsx'
 import { HandPlay } from './screens/HandPlay.jsx'
 import { Scoreboard } from './screens/Scoreboard.jsx'
 import { GameOver } from './screens/GameOver.jsx'
+import { PrintScoreboard } from './screens/PrintScoreboard/PrintScoreboard.jsx'
 
 export function AppRoutes() {
   return (
     <Routes>
+      {/* No AppLayout: the print sheet is self-contained, with none of the app chrome. */}
+      <Route path="print" element={<PrintScoreboard />} />
       <Route element={<AppLayout />}>
         <Route index element={<Home />} />
         <Route path="new" element={<NewGame />} />

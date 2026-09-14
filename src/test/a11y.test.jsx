@@ -66,4 +66,15 @@ describe('accessibility (axe)', () => {
     const { container } = renderApp({ route: '/over' })
     await noViolations(container)
   })
+
+  it('PrintScoreboard — filled sheet', async () => {
+    seedGame(buildGame(makeConfig({ count: 6 })))
+    const { container } = renderApp({ route: '/print' })
+    await noViolations(container)
+  })
+
+  it('PrintScoreboard — blank sheet', async () => {
+    const { container } = renderApp({ route: '/print?players=6&variant=long&promotions=1' })
+    await noViolations(container)
+  })
 })

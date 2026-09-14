@@ -11,7 +11,7 @@ import heroImg from '../assets/hero.png'
 export function AppLayout() {
   return (
     <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <AppBar position="sticky" color="primary" enableColorOnDark>
+      <AppBar position="sticky" color="primary" enableColorOnDark className="no-print">
         <Toolbar>
           <Box
             component="img"

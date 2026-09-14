@@ -44,9 +44,12 @@ export function Scoreboard() {
         <Typography variant="h4" component="h2">
           Scoreboard
         </Typography>
-        <Button onClick={() => navigate(editable ? '/play' : '/over')}>
-          {editable ? 'Back to game' : 'Back'}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button onClick={() => navigate('/print')}>Print</Button>
+          <Button onClick={() => navigate(editable ? '/play' : '/over')}>
+            {editable ? 'Back to game' : 'Back'}
+          </Button>
+        </Stack>
       </Box>
 
       <Box sx={{ overflowX: 'auto', maxHeight: '70dvh', border: 1, borderColor: 'divider', borderRadius: 1 }}>

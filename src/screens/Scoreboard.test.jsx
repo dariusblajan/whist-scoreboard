@@ -99,4 +99,12 @@ describe('Scoreboard', () => {
     expect(screen.queryByText('+10')).not.toBeInTheDocument()
     expect(screen.queryByText('−10')).not.toBeInTheDocument()
   })
+
+  it('Print button opens the print sheet for the current game', async () => {
+    const user = userEvent.setup()
+    seedExample()
+    renderApp({ route: '/scoreboard' })
+    await user.click(screen.getByRole('button', { name: 'Print' }))
+    expect(screen.getByRole('table', { name: 'Score sheet' })).toBeInTheDocument()
+  })
 })

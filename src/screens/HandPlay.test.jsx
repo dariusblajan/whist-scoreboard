@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { buildGame, makeConfig, renderApp, seedGame } from '../test/utils.jsx'
-import { loadStats } from '../state/persistence.js'
+import { loadGame, loadStats } from '../state/persistence.js'
 
 /** Short 3-player sequence: 1,1,1,2,3,4,5,6,7,8,8,7,6,5,4,3,2,1,1,1 — index 7 is a 6-card hand. */
 function seedAtSixCardHand(over) {
@@ -109,6 +109,33 @@ describe('HandPlay — finishing', () => {
 
     expect(screen.getByRole('heading', { name: /game over/i })).toBeInTheDocument()
     expect(loadStats().gamesFinished).toBe(0)
+  })
+})
+
+describe('HandPlay — autosave', () => {
+  it('persists a completed hand and the advanced currentHandIndex before the next hand loads', async () => {
+    const user = userEvent.setup()
+    seedAtSixCardHand()
+    renderApp({ route: '/play' })
+
+    for (const name of ['Player 3', 'Player 1', 'Player 2']) {
+      const pad = screen.getByRole('group', { name: `Bid for ${name}` })
+      await user.click(within(pad).getByRole('button', { name: '0' }))
+    }
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    const plusForP1 = screen.getByRole('button', { name: 'One more trick for Player 1' })
+    for (let i = 0; i < 6; i += 1) await user.click(plusForP1)
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    // Still on the summary phase — the hand is committed but not yet advanced.
+    let saved = loadGame()
+    expect(saved.hands[7].entries.p0.taken).toBe(6)
+    expect(saved.currentHandIndex).toBe(7)
+
+    await user.click(screen.getByRole('button', { name: 'Next hand' }))
+    saved = loadGame()
+    expect(saved.currentHandIndex).toBe(8)
+    expect(saved.hands[7].entries.p0).toEqual({ bid: 0, taken: 6 })
   })
 })
 
