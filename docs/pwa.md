@@ -30,7 +30,7 @@ git-ignored `dev-dist/`).
 
 ## Icons
 
-All icons in `public/` are generated from `src/assets/hero.png` (the v1
+All icons in `public/` are generated from `src/assets/logo.png` (the v1
 placeholder mark — there is no dedicated logo yet):
 
 ```sh

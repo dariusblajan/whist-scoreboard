@@ -7,7 +7,7 @@ import Container from '@mui/material/Container'
 import { ThemeToggleButton } from './ThemeToggleButton.jsx'
 import { LanguageSwitcher } from './LanguageSwitcher.jsx'
 import { useTranslation } from '../i18n/useTranslation.js'
-import heroImg from '../assets/hero.png'
+import heroImg from '../assets/logo.png'
 
 /** App shell: top bar with the mark, title, and theme toggle; routed content below. */
 export function AppLayout() {

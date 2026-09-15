@@ -12,7 +12,7 @@ ships with its own tests and leaves `main` in a working state.
 Current state: fresh Vite 8 + React 19 scaffold (`src/App.jsx` is the starter
 page). App deps so far: `@mui/core` alpha (to be replaced by `@mui/material`)
 and `mdi-material-ui` (icons). No test runner, router, or PWA plugin yet.
-`src/assets/hero.png` is the v1 placeholder app mark (no dedicated logo).
+`src/assets/logo.png` is the v1 placeholder app mark (no dedicated logo).
 
 ## Iterations
 
