@@ -1,7 +1,7 @@
 {
   "meta": {
     "documentTitle": "Scor Whist Românesc",
-    "language": "Limbă"
+    "languageStatus": "Limbă: {{name}}"
   },
   "common": {
     "appTitle": "Scor Whist",
@@ -20,7 +20,7 @@
     "themeSystem": "Temă: urmează sistemul",
     "themeLight": "Temă: deschisă",
     "themeDark": "Temă: întunecată",
-    "languageEnglish": "Engleză",
+    "languageEnglish": "English",
     "languageRomanian": "Română"
   },
   "home": {

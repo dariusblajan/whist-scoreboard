@@ -81,7 +81,7 @@ describe('accessibility (axe)', () => {
   it('Home — in Romanian (lang="ro")', async () => {
     const user = userEvent.setup()
     const { container } = renderApp({ route: '/' })
-    await user.click(screen.getByRole('button', { name: 'Română' }))
+    await user.click(screen.getByRole('button', { name: 'Language: English' }))
     expect(document.documentElement.lang).toBe('ro')
     await noViolations(container)
   })

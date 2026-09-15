@@ -1,7 +1,7 @@
 {
   "meta": {
     "documentTitle": "Romanian Whist Scoreboard",
-    "language": "Language"
+    "languageStatus": "Language: {{name}}"
   },
   "common": {
     "appTitle": "Whist Scoreboard",

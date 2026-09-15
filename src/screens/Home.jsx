@@ -11,7 +11,6 @@ import DialogActions from '@mui/material/DialogActions'
 import { useGameStore } from '../state/useGameStore.js'
 import { useTranslation } from '../i18n/useTranslation.js'
 import { InstallButton } from '../pwa/InstallButton.jsx'
-import { LanguageSwitcher } from '../components/LanguageSwitcher.jsx'
 
 export function Home() {
   const { t } = useTranslation()
@@ -79,7 +78,6 @@ export function Home() {
       )}
 
       <InstallButton />
-      <LanguageSwitcher />
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>

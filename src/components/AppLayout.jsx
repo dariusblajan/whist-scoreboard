@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import { ThemeToggleButton } from './ThemeToggleButton.jsx'
+import { LanguageSwitcher } from './LanguageSwitcher.jsx'
 import { useTranslation } from '../i18n/useTranslation.js'
 import heroImg from '../assets/hero.png'
 
@@ -24,6 +25,7 @@ export function AppLayout() {
           <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
             {t('common.appTitle')}
           </Typography>
+          <LanguageSwitcher />
           <ThemeToggleButton />
         </Toolbar>
       </AppBar>

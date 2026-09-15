@@ -1,30 +1,35 @@
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import ToggleButton from '@mui/material/ToggleButton'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
 import { useTranslation } from '../i18n/useTranslation.js'
 import { LOCALES } from '../i18n/resources.js'
 
-/** Language picker — on Home, so it's reachable before or after a game exists. */
+/**
+ * Compact language toggle for the top bar, next to the theme toggle. Only two
+ * locales exist, so — mirroring `ThemeToggleButton` — a single tap cycles to
+ * the other one; the button shows the active locale's code and a tooltip /
+ * aria-label spell out the active language in full.
+ */
 export function LanguageSwitcher() {
   const { t, locale, setLocale } = useTranslation()
+  const index = LOCALES.findIndex((l) => l.code === locale)
+  const current = LOCALES[index] ?? LOCALES[0]
+  const label = t('meta.languageStatus', { name: t(current.labelKey) })
+
+  const cycle = () => {
+    const next = LOCALES[(index + 1) % LOCALES.length]
+    setLocale(next.code)
+  }
+
   return (
-    <Stack spacing={1}>
-      <Typography variant="caption" color="text.secondary" id="language-switcher-label">
-        {t('meta.language')}
-      </Typography>
-      <ToggleButtonGroup
-        exclusive
-        value={locale}
-        onChange={(_, next) => next != null && setLocale(next)}
-        aria-labelledby="language-switcher-label"
+    <Tooltip title={label}>
+      <IconButton
+        color="inherit"
+        onClick={cycle}
+        aria-label={label}
+        sx={{ fontSize: '0.8rem', fontWeight: 700 }}
       >
-        {LOCALES.map(({ code, labelKey }) => (
-          <ToggleButton key={code} value={code}>
-            {t(labelKey)}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-    </Stack>
+        {current.code.toUpperCase()}
+      </IconButton>
+    </Tooltip>
   )
 }

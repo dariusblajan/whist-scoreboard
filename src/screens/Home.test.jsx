@@ -75,12 +75,12 @@ describe('Home', () => {
     expect(loadGame()).toBeNull()
   })
 
-  it('the language switcher changes visible copy and persists across reload', async () => {
+  it('the top-bar language switcher changes visible copy and persists across reload', async () => {
     const user = userEvent.setup()
     const first = renderApp({ route: '/' })
 
     expect(screen.getByText('Keep score for a game of Romanian whist.')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Română' }))
+    await user.click(screen.getByRole('button', { name: 'Language: English' }))
     expect(screen.getByText('Ține scorul la un joc de whist românesc.')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('ro')
     first.unmount()
