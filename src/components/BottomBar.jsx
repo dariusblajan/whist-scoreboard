@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { useTranslation } from '../i18n/useTranslation.js'
 
 /**
  * Sticky action bar pinned to the bottom of the viewport: a secondary "Back"
@@ -8,9 +9,14 @@ import Button from '@mui/material/Button'
  * lands on the primary button so a step can focus it once its entry is done.
  */
 export const BottomBar = forwardRef(function BottomBar(
-  { backLabel = 'Back', onBack, nextLabel = 'Next', onNext, nextDisabled = false },
+  { backLabel, onBack, nextLabel, onNext, nextDisabled = false },
   ref,
 ) {
+  const { t } = useTranslation()
+  // Only an omitted prop gets the translated default — matches the old
+  // default-parameter behaviour, where an explicit `null` rendered blank.
+  const resolvedBackLabel = backLabel === undefined ? t('common.back') : backLabel
+  const resolvedNextLabel = nextLabel === undefined ? t('common.next') : nextLabel
   return (
     <Box
       className="no-print"
@@ -26,7 +32,7 @@ export const BottomBar = forwardRef(function BottomBar(
       }}
     >
       <Button type="button" size="large" onClick={onBack} disabled={!onBack}>
-        {backLabel}
+        {resolvedBackLabel}
       </Button>
       <Button
         ref={ref}
@@ -36,7 +42,7 @@ export const BottomBar = forwardRef(function BottomBar(
         onClick={onNext}
         disabled={nextDisabled || !onNext}
       >
-        {nextLabel}
+        {resolvedNextLabel}
       </Button>
     </Box>
   )

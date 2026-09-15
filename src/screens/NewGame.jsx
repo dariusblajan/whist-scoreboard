@@ -14,13 +14,14 @@ import Radio from '@mui/material/Radio'
 import { ArrowUp, ArrowDown } from '../icons.js'
 import { cardsDealtSequence } from '../rules/index.js'
 import { useGameStore } from '../state/useGameStore.js'
+import { useTranslation } from '../i18n/useTranslation.js'
 import { BottomBar } from '../components/BottomBar.jsx'
 
-const STEPS = ['Player count', 'Variant', 'Names', 'Seating']
+const STEP_KEYS = ['newGame.stepPlayerCount', 'newGame.stepVariant', 'newGame.stepNames', 'newGame.stepSeating']
 const COUNTS = [3, 4, 5, 6]
 
-const makeRoster = (count) =>
-  Array.from({ length: count }, (_, i) => ({ id: `p${i}`, name: `Player ${i + 1}` }))
+const makeRoster = (count, t) =>
+  Array.from({ length: count }, (_, i) => ({ id: `p${i}`, name: t('newGame.playerLabel', { n: i + 1 }) }))
 
 function shuffled(list) {
   const out = [...list]
@@ -32,6 +33,7 @@ function shuffled(list) {
 }
 
 export function NewGame() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { newGame } = useGameStore()
 
@@ -39,7 +41,7 @@ export function NewGame() {
   const [playerCount, setPlayerCount] = useState(4)
   const [variant, setVariant] = useState('short')
   const [promotions, setPromotions] = useState(false)
-  const [roster, setRoster] = useState(() => makeRoster(4))
+  const [roster, setRoster] = useState(() => makeRoster(4, t))
   const [firstDealerId, setFirstDealerId] = useState('p0')
 
   const firstControlRef = useRef(null)
@@ -52,7 +54,7 @@ export function NewGame() {
 
   const setCount = (count) => {
     setPlayerCount(count)
-    const next = makeRoster(count)
+    const next = makeRoster(count, t)
     setRoster(next)
     setFirstDealerId(next[0].id)
   }
@@ -75,7 +77,7 @@ export function NewGame() {
   const start = () => {
     const players = roster.map((p, seatIndex) => ({
       id: p.id,
-      name: p.name.trim() || `Player ${seatIndex + 1}`,
+      name: p.name.trim() || t('newGame.playerLabel', { n: seatIndex + 1 }),
       seatIndex,
     }))
     const firstDealerSeatIndex = roster.findIndex((p) => p.id === firstDealerId)
@@ -83,27 +85,27 @@ export function NewGame() {
     navigate('/play')
   }
 
-  const isLast = step === STEPS.length - 1
+  const isLast = step === STEP_KEYS.length - 1
 
   return (
     <Stack spacing={3}>
       <Typography variant="h4" component="h2">
-        New game
+        {t('newGame.title')}
       </Typography>
       <Typography color="text.secondary">
-        Step {step + 1} of {STEPS.length} — {STEPS[step]}
+        {t('newGame.stepIndicator', { step: step + 1, total: STEP_KEYS.length, label: t(STEP_KEYS[step]) })}
       </Typography>
 
       {step === 0 && (
         <Stack spacing={1}>
           <Typography component="h3" variant="subtitle1">
-            How many players?
+            {t('newGame.howManyPlayers')}
           </Typography>
           <ToggleButtonGroup
             exclusive
             value={playerCount}
             onChange={(_, v) => v != null && setCount(v)}
-            aria-label="Player count"
+            aria-label={t('newGame.playerCountAria')}
           >
             {COUNTS.map((c, i) => (
               <ToggleButton
@@ -125,17 +127,17 @@ export function NewGame() {
             exclusive
             value={variant}
             onChange={(_, v) => v != null && setVariant(v)}
-            aria-label="Variant"
+            aria-label={t('newGame.variantAria')}
           >
             <ToggleButton value="short" ref={firstControlRef} sx={{ minHeight: 48 }}>
-              Short
+              {t('newGame.short')}
             </ToggleButton>
             <ToggleButton value="long" sx={{ minHeight: 48 }}>
-              Long
+              {t('newGame.long')}
             </ToggleButton>
           </ToggleButtonGroup>
           <Typography color="text.secondary">
-            {sequence.length} hands ({3 * playerCount} + 12)
+            {t('newGame.handsCount', { count: sequence.length, formula: `${3 * playerCount} + 12` })}
           </Typography>
           <Paper
             variant="outlined"
@@ -152,23 +154,21 @@ export function NewGame() {
                 onChange={(e) => setPromotions(e.target.checked)}
               />
             }
-            label="Promotions"
+            label={t('newGame.promotionsLabel')}
           />
           <Typography variant="caption" color="text.secondary">
-            ±10 for every 5 hands in a row you make / miss; 1-card hands reset it.
+            {t('newGame.promotionsHelp')}
           </Typography>
         </Stack>
       )}
 
       {step === 2 && (
         <Stack spacing={2}>
-          <Typography color="text.secondary">
-            Optional — the defaults work. Names raise the keyboard; nothing else does.
-          </Typography>
+          <Typography color="text.secondary">{t('newGame.namesHelp')}</Typography>
           {roster.map((p, i) => (
             <TextField
               key={p.id}
-              label={`Player ${i + 1}`}
+              label={t('newGame.playerLabel', { n: i + 1 })}
               value={p.name}
               inputRef={i === 0 ? firstControlRef : undefined}
               onChange={(e) =>
@@ -190,15 +190,13 @@ export function NewGame() {
 
       {step === 3 && (
         <Stack spacing={2}>
-          <Typography color="text.secondary">
-            Order round the table, and who deals first.
-          </Typography>
+          <Typography color="text.secondary">{t('newGame.seatingHelp')}</Typography>
           <Button
             ref={firstControlRef}
             onClick={() => setRoster((prev) => shuffled(prev))}
             variant="outlined"
           >
-            Randomize
+            {t('newGame.randomize')}
           </Button>
           <Button
             component={Link}
@@ -207,7 +205,7 @@ export function NewGame() {
             rel="noopener"
             variant="outlined"
           >
-            Print blank sheet
+            {t('newGame.printBlankSheet')}
           </Button>
           <Stack spacing={1}>
             {roster.map((p, i) => (
@@ -222,25 +220,25 @@ export function NewGame() {
                     <Radio
                       checked={firstDealerId === p.id}
                       onChange={() => setFirstDealerId(p.id)}
-                      inputProps={{ 'aria-label': `${p.name} deals first` }}
+                      inputProps={{ 'aria-label': t('newGame.dealsFirstAria', { name: p.name }) }}
                     />
                   }
                   label={
                     <span>
-                      Seat {i + 1}: {p.name}
-                      {firstDealerId === p.id ? ' — deals first' : ''}
+                      {t('newGame.seatLabel', { n: i + 1, name: p.name })}
+                      {firstDealerId === p.id ? t('newGame.dealsFirstSuffix') : ''}
                     </span>
                   }
                 />
                 <IconButton
-                  aria-label={`Move ${p.name} up`}
+                  aria-label={t('newGame.moveUpAria', { name: p.name })}
                   disabled={i === 0}
                   onClick={() => move(i, -1)}
                 >
                   <ArrowUp />
                 </IconButton>
                 <IconButton
-                  aria-label={`Move ${p.name} down`}
+                  aria-label={t('newGame.moveDownAria', { name: p.name })}
                   disabled={i === roster.length - 1}
                   onClick={() => move(i, 1)}
                 >
@@ -254,9 +252,9 @@ export function NewGame() {
 
       <BottomBar
         ref={nextRef}
-        backLabel={step === 0 ? 'Cancel' : 'Back'}
+        backLabel={step === 0 ? t('common.cancel') : t('common.back')}
         onBack={step === 0 ? () => navigate('/') : () => setStep((s) => s - 1)}
-        nextLabel={isLast ? 'Start' : 'Next'}
+        nextLabel={isLast ? t('common.start') : t('common.next')}
         onNext={isLast ? start : () => setStep((s) => s + 1)}
       />
     </Stack>

@@ -1,7 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { I18nProvider } from '../i18n/I18nProvider.jsx'
 import { InstallButton } from './InstallButton.jsx'
+
+function renderInstallButton() {
+  return render(
+    <I18nProvider>
+      <InstallButton />
+    </I18nProvider>,
+  )
+}
 
 /** A stand-in for the browser's BeforeInstallPromptEvent. */
 function fireBeforeInstallPrompt() {
@@ -20,14 +29,14 @@ afterEach(() => {
 
 describe('InstallButton', () => {
   it('is hidden until the browser offers an install', () => {
-    render(<InstallButton />)
+    renderInstallButton()
     expect(
       screen.queryByRole('button', { name: /install app/i }),
     ).not.toBeInTheDocument()
   })
 
   it('appears after beforeinstallprompt and prompts on click', async () => {
-    render(<InstallButton />)
+    renderInstallButton()
     const event = fireBeforeInstallPrompt()
 
     const button = await screen.findByRole('button', { name: /install app/i })
@@ -36,7 +45,7 @@ describe('InstallButton', () => {
   })
 
   it('disappears once the app is installed', async () => {
-    render(<InstallButton />)
+    renderInstallButton()
     fireBeforeInstallPrompt()
     await screen.findByRole('button', { name: /install app/i })
 

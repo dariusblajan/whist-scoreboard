@@ -20,8 +20,8 @@ functional offline after the first load. No runtime network calls.
    - `devOptions.enabled: true` for local testing.
 2. **Icons** — generate `pwa-192.png`, `pwa-512.png`, `maskable-512.png`,
    `apple-touch-icon.png`, `favicon.png` into `public/` **from
-   `src/assets/hero.png`** (the v1 placeholder mark — no dedicated logo).
-   - Pad `hero.png` onto a solid `background_color` square for the maskable
+   `src/assets/logo.png`** (the v1 placeholder mark — no dedicated logo).
+   - Pad `logo.png` onto a solid `background_color` square for the maskable
      variant (safe-zone), plain resize for the rest.
    - Document the generation command (e.g. `sharp` / `pwa-asset-generator`) in
      `docs/` so icons can be regenerated if the mark changes.

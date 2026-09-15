@@ -12,14 +12,11 @@ import DialogActions from '@mui/material/DialogActions'
 import { useGameStore } from '../state/useGameStore.js'
 import { standings } from '../rules/index.js'
 import { playerName, playerTallies } from '../state/selectors.js'
-
-/** Ordinal for a rank, with ties marked (e.g. two firsts both show "1st (tie)"). */
-function rankLabel(rank, shared) {
-  const ord = ['1st', '2nd', '3rd', '4th', '5th', '6th'][rank - 1] ?? `${rank}th`
-  return shared ? `${ord} (tie)` : ord
-}
+import { useTranslation } from '../i18n/useTranslation.js'
+import { formatOrdinal } from '../i18n/ordinal.js'
 
 export function GameOver() {
+  const { t, locale } = useTranslation()
   const { game, discardGame } = useGameStore()
   const navigate = useNavigate()
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -39,54 +36,58 @@ export function GameOver() {
   return (
     <Stack spacing={3}>
       <Typography variant="h4" component="h2">
-        Game over
+        {t('gameOver.title')}
       </Typography>
       <Stack spacing={1}>
         {rows.map((row) => {
-          const t = tallies[row.playerId]
+          const tally = tallies[row.playerId]
+          const shared = rankCounts[row.rank] > 1
+          const ordinal = formatOrdinal(locale, row.rank)
           return (
             <Paper key={row.playerId} variant="outlined" sx={{ p: 1.5 }}>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography>
-                  {rankLabel(row.rank, rankCounts[row.rank] > 1)} —{' '}
+                  {shared ? t('gameOver.rankTie', { ordinal }) : t('gameOver.rank', { ordinal })} —{' '}
                   {playerName(game, row.playerId)}
                 </Typography>
                 <Typography fontWeight="bold">{row.total}</Typography>
               </Stack>
               <Typography variant="body2" color="text.secondary">
-                {t.made} made · {t.over} over · {t.under} under
                 {promotions
-                  ? ` · promotions ${t.promotion >= 0 ? '+' : ''}${t.promotion}`
-                  : ''}
+                  ? t('gameOver.talliesWithPromotions', {
+                      made: tally.made,
+                      over: tally.over,
+                      under: tally.under,
+                      promo: tally.promotion >= 0 ? `+${tally.promotion}` : tally.promotion,
+                    })
+                  : t('gameOver.tallies', { made: tally.made, over: tally.over, under: tally.under })}
               </Typography>
             </Paper>
           )
         })}
       </Stack>
       <Button variant="contained" size="large" onClick={() => setConfirmOpen(true)}>
-        New game
+        {t('common.newGame')}
       </Button>
       <Button size="large" onClick={() => navigate('/print')}>
-        Print / Save as PDF
+        {t('gameOver.printSave')}
       </Button>
       <Button size="large" onClick={() => navigate('/scoreboard')}>
-        View scoreboard
+        {t('home.viewScoreboard')}
       </Button>
       <Button size="large" onClick={() => navigate('/')}>
-        Home
+        {t('common.home')}
       </Button>
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Start a new game?</DialogTitle>
+        <DialogTitle>{t('home.startNewConfirmTitle')}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            This clears the finished game from the scoreboard.
-          </DialogContentText>
+          <DialogContentText>{t('home.startNewConfirmBody')}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={() => setConfirmOpen(false)}>{t('common.cancel')}</Button>
           <Button onClick={startNew} color="error">
-            New game
+            {t('common.newGame')}
           </Button>
         </DialogActions>
       </Dialog>

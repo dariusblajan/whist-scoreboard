@@ -9,9 +9,11 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import { useGameStore } from '../state/useGameStore.js'
+import { useTranslation } from '../i18n/useTranslation.js'
 import { InstallButton } from '../pwa/InstallButton.jsx'
 
 export function Home() {
+  const { t } = useTranslation()
   const { game, stats, discardGame } = useGameStore()
   const navigate = useNavigate()
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -31,34 +33,29 @@ export function Home() {
   return (
     <Stack spacing={3}>
       <Typography variant="h4" component="h2">
-        Whist Scoreboard
+        {t('common.appTitle')}
       </Typography>
-      <Typography color="text.secondary">
-        Keep score for a game of Romanian whist.
-      </Typography>
+      <Typography color="text.secondary">{t('home.subtitle')}</Typography>
 
       {firstRun ? (
-        <Typography color="text.secondary">
-          No games yet. Start a new one — pick the players, and it tracks every
-          bid, trick, and running total for you.
-        </Typography>
+        <Typography color="text.secondary">{t('home.firstRun')}</Typography>
       ) : (
         <Stack direction="row" spacing={3}>
-          <Stat label="Games played" value={stats.gamesPlayed} />
-          <Stat label="Games finished" value={stats.gamesFinished} />
+          <Stat label={t('home.gamesPlayed')} value={stats.gamesPlayed} />
+          <Stat label={t('home.gamesFinished')} value={stats.gamesFinished} />
         </Stack>
       )}
 
       {isActive && (
         <Stack spacing={1.5}>
           <Button component={RouterLink} to="/play" variant="contained" size="large">
-            Resume game
+            {t('home.resumeGame')}
           </Button>
           <Button component={RouterLink} to="/scoreboard" size="large">
-            View scoreboard
+            {t('home.viewScoreboard')}
           </Button>
           <Button onClick={() => setConfirmOpen(true)} size="large">
-            New game
+            {t('common.newGame')}
           </Button>
         </Stack>
       )}
@@ -66,37 +63,37 @@ export function Home() {
       {isFinished && (
         <Stack spacing={1.5}>
           <Button component={RouterLink} to="/over" variant="contained" size="large">
-            View last game
+            {t('home.viewLastGame')}
           </Button>
           <Button onClick={() => setConfirmOpen(true)} size="large">
-            New game
+            {t('common.newGame')}
           </Button>
         </Stack>
       )}
 
       {!isActive && !isFinished && (
         <Button component={RouterLink} to="/new" variant="contained" size="large">
-          New game
+          {t('common.newGame')}
         </Button>
       )}
 
       <InstallButton />
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>{isActive ? 'Discard the game in progress?' : 'Start a new game?'}</DialogTitle>
+        <DialogTitle>
+          {isActive ? t('home.discardConfirmTitle') : t('home.startNewConfirmTitle')}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {isActive
-              ? 'Starting a new game deletes the current one. This cannot be undone.'
-              : 'This clears the finished game from the scoreboard.'}
+            {isActive ? t('home.discardConfirmBody') : t('home.startNewConfirmBody')}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>
-            {isActive ? 'Keep playing' : 'Cancel'}
+            {isActive ? t('home.keepPlaying') : t('common.cancel')}
           </Button>
           <Button onClick={startNew} color="error">
-            {isActive ? 'Discard and start new' : 'New game'}
+            {isActive ? t('home.discardAndStartNew') : t('common.newGame')}
           </Button>
         </DialogActions>
       </Dialog>

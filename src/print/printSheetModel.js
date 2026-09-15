@@ -11,11 +11,13 @@ import { handPoints } from '../rules/scoring.js'
 import { promotionBonuses } from '../rules/promotions.js'
 import { cumulativeTotals, standings } from '../rules/standings.js'
 
-/** Seat-ordered players for a blank sheet: no names to show, just "Player N". */
-function placeholderPlayers(playerCount) {
+/** Seat-ordered players for a blank sheet: no names to show, just "Player N".
+ * `playerLabel(n)` names seat `n` (1-based) — callers pass a localized one;
+ * defaults to English so this stays usable without a translator. */
+function placeholderPlayers(playerCount, playerLabel = (n) => `Player ${n}`) {
   return Array.from({ length: playerCount }, (_, i) => ({
     id: `p${i}`,
-    name: `Player ${i + 1}`,
+    name: playerLabel(i + 1),
     seatIndex: i,
   }))
 }
@@ -55,8 +57,8 @@ function buildRows(hands, players, entriesFor) {
 }
 
 /** Blank sheet: the correct hand grid, empty cells, no game required. */
-function fromConfig({ playerCount, variant, promotions = false }) {
-  const players = placeholderPlayers(playerCount)
+function fromConfig({ playerCount, variant, promotions = false, playerLabel }) {
+  const players = placeholderPlayers(playerCount, playerLabel)
   const hands = generateHands(players, variant, 0)
   const emptyCells = () => {
     const cells = {}
@@ -123,7 +125,10 @@ function fromGame(game) {
 
 /**
  * @param {{ game?: import('../rules/types.js').Game,
- *   config?: { playerCount: number, variant: 'short'|'long', promotions?: boolean } }} source
+ *   config?: { playerCount: number, variant: 'short'|'long', promotions?: boolean,
+ *     playerLabel?: (seat: number) => string } }} source `config.playerLabel`
+ *   names a blank sheet's placeholder seats (1-based); defaults to English
+ *   "Player N" — pass a localized one from the caller.
  * @returns {?{ title: string, meta: object, players: Array, rows: Array,
  *   totals: ?Object.<string, number>, standings: ?Array }}
  */

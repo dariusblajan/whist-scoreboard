@@ -1,8 +1,8 @@
 # Iteration 08 — Internationalization (M7)
 
-> **Status: PLANNED — do not implement yet.** Scoped here so strings written in
-> iterations 03–07 stay centralizable. Best done after the UI has settled
-> (post-M5) to avoid re-translating churned copy.
+> **Status: IMPLEMENTED** (2026-09-15). Every screen/component now reads
+> through `t()`; see "Implementation notes" at the bottom for where this
+> diverged from the original approach.
 
 ## Goal
 
@@ -76,12 +76,39 @@ than English.
 
 ## Acceptance checklist
 
-- [ ] Every visible string comes from a locale file; lint blocks new literals.
-- [ ] Full English and Romanian translations; key sets match exactly.
-- [ ] Language switcher on Home; auto-detects from browser on first run;
+- [x] Every visible string comes from a locale file; a vitest sweep blocks new
+      hardcoded JSX text (see Implementation notes — not wired into `yarn lint`).
+- [x] Full English and Romanian translations; key sets match exactly.
+- [x] Language switcher on Home; auto-detects from browser on first run;
       persisted; `<html lang>` updated.
-- [ ] Romanian uses correct whist terminology.
-- [ ] Counts pluralize correctly in Romanian.
-- [ ] No new runtime network calls; offline audit passes.
-- [ ] Print sheet and ARIA labels localized.
-- [ ] `yarn test` green, `yarn lint` clean, `yarn build` ok.
+- [x] Romanian uses correct whist terminology.
+- [x] Counts pluralize correctly in Romanian.
+- [x] No new runtime network calls; offline audit passes.
+- [x] Print sheet and ARIA labels localized.
+- [x] `yarn test` green, `yarn lint` clean, `yarn build` ok.
+
+## Implementation notes
+
+- **Hand-rolled `t()`, not react-i18next.** `src/i18n/format.js` is a ~70-line
+  dot-path lookup + `{{var}}` interpolation + `_one`/`_few`/`_other` plural
+  suffixes — small enough that pulling in a runtime library for two locales
+  and ~90 keys wasn't worth it. `useTranslation()` returns `{ t, locale,
+  setLocale }`, the same call-site shape the plan asked for, so swapping in a
+  library later is a provider-only change.
+- **No `i18next/no-literal-string` ESLint rule** (it's react-i18next-specific
+  and there's no i18next here). `src/test/i18n-sweep.test.js` is the
+  substitute: it scans every `.jsx` file under `src/screens`, `src/
+  components`, `src/pwa`, and `src/print` for a JSX text node that looks like
+  English prose (two+ words) sitting outside a `t()` call, and fails per-file
+  if it finds one. It runs under `yarn test`, not `yarn lint` — it's a
+  vitest test, not an ESLint rule, and only catches JSX text nodes (not
+  template literals in plain `.js`, which is how `printSheetModel.js`'s
+  blank-sheet player names slipped past it until caught by review; fixed by
+  having the model accept a `playerLabel(seat)` callback the screen fills in
+  with `t()`).
+- **Manifest left in English** (`vite.config.js`), per the plan's "keep it
+  simple" carve-out — only `document.title` and `<html lang>` update live via
+  `I18nProvider`.
+- **Rank ordinals and dates are locale functions, not JSON strings**
+  (`src/i18n/ordinal.js`; `Intl.DateTimeFormat` on the print sheet) since
+  their shape differs by locale ("1st" vs "Locul 1"), not just their words.

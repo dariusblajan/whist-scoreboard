@@ -2,7 +2,7 @@
 //
 //   node scripts/generate-icons.mjs
 //
-// Source: src/assets/hero.png (the v1 placeholder mark — there is no dedicated
+// Source: src/assets/logo.png (the v1 placeholder mark — there is no dedicated
 // logo yet). Outputs land in public/ and are committed. Re-run this whenever the
 // mark changes. Requires the `sharp` dev dependency.
 import { fileURLToPath } from 'node:url'
@@ -10,7 +10,7 @@ import path from 'node:path'
 import sharp from 'sharp'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const SRC = path.join(root, 'src/assets/hero.png')
+const SRC = path.join(root, 'src/assets/logo.png')
 const OUT = path.join(root, 'public')
 
 // Keep in sync with the manifest `background_color` in vite.config.js.

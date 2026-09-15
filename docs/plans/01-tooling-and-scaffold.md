@@ -40,7 +40,7 @@ library, routing, and a clean folder structure. No game logic yet.
    Placeholder screen components that just render their name.
 7. **Replace** `src/App.jsx` with the router shell + `<CssBaseline>` + theme
    provider. Delete starter demo CSS and the Vite/React SVGs once unreferenced.
-   **Keep `src/assets/hero.png`** — it's the placeholder app mark (app bar on
+   **Keep `src/assets/logo.png`** — it's the placeholder app mark (app bar on
    Home, and the PWA icon source in Iteration 05). No dedicated logo in v1.
 8. **README** — short "develop / test / build" section.
 
@@ -69,7 +69,7 @@ library, routing, and a clean folder structure. No game logic yet.
   cycle helpers), split context / hook / `ThemeModeProvider.jsx`.
 - Routing in `src/routes.jsx` under an `AppLayout` shell (app bar + theme
   toggle); placeholder screens for all five routes; unknown routes → Home.
-- `favicon.png` is `hero.png` for now; proper icons in Iteration 05.
+- `favicon.png` is `logo.png` for now; proper icons in Iteration 05.
 - Bundle: ~134 kB gzip (MUI) — revisit with code-splitting if it matters later.
 - **Icon imports:** Vite 8's Rolldown optimizer mis-unwraps mdi-material-ui's
   CommonJS per-icon default export (renders as `{__esModule, default}` → React
