@@ -3,6 +3,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import { Close } from '../icons.js'
+import { useTranslation } from '../i18n/useTranslation.js'
 
 /**
  * Manual, mid-game-safe update prompt. When a new service worker is waiting,
@@ -10,6 +11,7 @@ import { Close } from '../icons.js'
  * "Reload". Nothing auto-reloads.
  */
 export function PwaUpdatePrompt() {
+  const { t } = useTranslation()
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -24,7 +26,7 @@ export function PwaUpdatePrompt() {
         // Don't let a stray click-away hide it; require an explicit choice.
         if (reason !== 'clickaway') close()
       }}
-      message="New version available"
+      message={t('common.newVersionAvailable')}
       action={
         <>
           <Button
@@ -32,12 +34,12 @@ export function PwaUpdatePrompt() {
             size="small"
             onClick={() => updateServiceWorker(true)}
           >
-            Reload
+            {t('common.reload')}
           </Button>
           <IconButton
             size="small"
             color="inherit"
-            aria-label="Dismiss update"
+            aria-label={t('common.dismissUpdate')}
             onClick={close}
           >
             <Close fontSize="small" />

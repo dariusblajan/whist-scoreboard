@@ -5,10 +5,12 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import { ThemeToggleButton } from './ThemeToggleButton.jsx'
+import { useTranslation } from '../i18n/useTranslation.js'
 import heroImg from '../assets/hero.png'
 
 /** App shell: top bar with the mark, title, and theme toggle; routed content below. */
 export function AppLayout() {
+  const { t } = useTranslation()
   return (
     <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="sticky" color="primary" enableColorOnDark className="no-print">
@@ -20,7 +22,7 @@ export function AppLayout() {
             sx={{ width: 28, height: 28, mr: 1.5 }}
           />
           <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
-            Whist Scoreboard
+            {t('common.appTitle')}
           </Typography>
           <ThemeToggleButton />
         </Toolbar>

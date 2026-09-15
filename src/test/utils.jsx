@@ -1,5 +1,6 @@
 import { MemoryRouter } from 'react-router-dom'
 import { render } from '@testing-library/react'
+import { I18nProvider } from '../i18n/I18nProvider.jsx'
 import { ThemeModeProvider } from '../theme/ThemeModeProvider.jsx'
 import { GameStoreProvider } from '../state/gameStore.jsx'
 import { actions, gameReducer } from '../state/gameReducer.js'
@@ -37,13 +38,15 @@ export function makeConfig({ count = 3, ...over } = {}) {
 /** Render the full routed app at a given entry path, inside all providers. */
 export function renderApp({ route = '/' } = {}) {
   return render(
-    <ThemeModeProvider>
-      <GameStoreProvider>
-        <MemoryRouter initialEntries={[route]}>
-          <AppRoutes />
-        </MemoryRouter>
-      </GameStoreProvider>
-    </ThemeModeProvider>,
+    <I18nProvider>
+      <ThemeModeProvider>
+        <GameStoreProvider>
+          <MemoryRouter initialEntries={[route]}>
+            <AppRoutes />
+          </MemoryRouter>
+        </GameStoreProvider>
+      </ThemeModeProvider>
+    </I18nProvider>,
   )
 }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { screen } from '@testing-library/react'
 import { buildGame, makeConfig, renderApp, seedGame } from '../../test/utils.jsx'
+import { saveLocale } from '../../i18n/localePersistence.js'
 
 describe('PrintScoreboard', () => {
   it('renders a filled sheet from the active game, with no app chrome', () => {
@@ -57,5 +58,15 @@ describe('PrintScoreboard', () => {
     expect(table.querySelectorAll('tbody tr')).toHaveLength(3 * 3 + 12)
     expect(screen.queryByText('Total')).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Final standings' })).not.toBeInTheDocument()
+  })
+
+  it('localizes the blank sheet\'s placeholder player names, not just its chrome', () => {
+    saveLocale('ro')
+    renderApp({ route: '/print?players=3&variant=short&promotions=0' })
+
+    const headerRow = screen.getByRole('table', { name: 'Fișă de scor' }).querySelectorAll('thead tr')[0]
+    expect(headerRow).toHaveTextContent('Jucătorul 1')
+    expect(headerRow).toHaveTextContent('Jucătorul 3')
+    expect(screen.queryByText('Player 1')).not.toBeInTheDocument()
   })
 })

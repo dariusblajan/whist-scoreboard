@@ -12,6 +12,7 @@ import TableCell from '@mui/material/TableCell'
 import Chip from '@mui/material/Chip'
 import { useGameStore } from '../state/useGameStore.js'
 import { scoreboardRows } from '../state/selectors.js'
+import { useTranslation } from '../i18n/useTranslation.js'
 
 const PINNED = {
   position: 'sticky',
@@ -23,6 +24,7 @@ const PINNED = {
 }
 
 export function Scoreboard() {
+  const { t } = useTranslation()
   const { game, goToHand } = useGameStore()
   const navigate = useNavigate()
 
@@ -42,21 +44,21 @@ export function Scoreboard() {
     <Stack spacing={2}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h4" component="h2">
-          Scoreboard
+          {t('scoreboard.title')}
         </Typography>
         <Stack direction="row" spacing={1}>
-          <Button onClick={() => navigate('/print')}>Print</Button>
+          <Button onClick={() => navigate('/print')}>{t('scoreboard.print')}</Button>
           <Button onClick={() => navigate(editable ? '/play' : '/over')}>
-            {editable ? 'Back to game' : 'Back'}
+            {editable ? t('scoreboard.backToGame') : t('common.back')}
           </Button>
         </Stack>
       </Box>
 
       <Box sx={{ overflowX: 'auto', maxHeight: '70dvh', border: 1, borderColor: 'divider', borderRadius: 1 }}>
-        <Table size="small" stickyHeader aria-label="Scoreboard">
+        <Table size="small" stickyHeader aria-label={t('scoreboard.tableAria')}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ ...PINNED, zIndex: 4 }}>Cards</TableCell>
+              <TableCell sx={{ ...PINNED, zIndex: 4 }}>{t('scoreboard.cardsHeader')}</TableCell>
               {game.players.map((p) => (
                 <TableCell
                   key={p.id}
@@ -65,7 +67,7 @@ export function Scoreboard() {
                   sx={{ fontWeight: leaders.has(p.id) ? 700 : 400 }}
                 >
                   {p.name}
-                  {leaders.has(p.id) ? ' ★' : ''}
+                  {leaders.has(p.id) ? t('scoreboard.leaderSuffix') : ''}
                 </TableCell>
               ))}
             </TableRow>
@@ -73,10 +75,10 @@ export function Scoreboard() {
               <TableCell component="td" aria-hidden sx={{ ...PINNED, top: '2rem', zIndex: 4 }} />
               {game.players.map((p) => [
                 <TableCell key={`${p.id}-b`} align="center" sx={{ top: '2rem' }}>
-                  Bid
+                  {t('scoreboard.bidHeader')}
                 </TableCell>,
                 <TableCell key={`${p.id}-s`} align="center" sx={{ top: '2rem' }}>
-                  Score
+                  {t('scoreboard.scoreHeader')}
                 </TableCell>,
               ])}
             </TableRow>
@@ -120,7 +122,7 @@ export function Scoreboard() {
 
           <TableFooter>
             <TableRow>
-              <TableCell sx={{ ...PINNED, bottom: 0, zIndex: 4 }}>Total</TableCell>
+              <TableCell sx={{ ...PINNED, bottom: 0, zIndex: 4 }}>{t('scoreboard.totalRow')}</TableCell>
               {game.players.map((p) => (
                 <TableCell
                   key={p.id}

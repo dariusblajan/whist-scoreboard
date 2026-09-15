@@ -75,6 +75,20 @@ describe('Home', () => {
     expect(loadGame()).toBeNull()
   })
 
+  it('the language switcher changes visible copy and persists across reload', async () => {
+    const user = userEvent.setup()
+    const first = renderApp({ route: '/' })
+
+    expect(screen.getByText('Keep score for a game of Romanian whist.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Română' }))
+    expect(screen.getByText('Ține scorul la un joc de whist românesc.')).toBeInTheDocument()
+    expect(document.documentElement.lang).toBe('ro')
+    first.unmount()
+
+    renderApp({ route: '/' })
+    expect(screen.getByText('Ține scorul la un joc de whist românesc.')).toBeInTheDocument()
+  })
+
   it('starting a new game increments gamesPlayed in persisted stats', async () => {
     const user = userEvent.setup()
     renderApp({ route: '/' })

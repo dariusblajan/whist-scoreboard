@@ -16,6 +16,7 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import { Minus, Plus } from '../icons.js'
 import { useGameStore } from '../state/useGameStore.js'
+import { useTranslation } from '../i18n/useTranslation.js'
 import {
   bidStepComplete,
   dealerBidIllegal,
@@ -38,7 +39,7 @@ const SUITS = [
   { value: 'clubs', symbol: '♣' },
 ]
 
-const OUTCOME_LABEL = { made: 'Made it', over: 'Over', under: 'Under' }
+const OUTCOME_KEY = { made: 'handPlay.outcomeMade', over: 'handPlay.outcomeOver', under: 'handPlay.outcomeUnder' }
 
 export function HandPlay() {
   const store = useGameStore()
@@ -55,6 +56,7 @@ export function HandPlay() {
 }
 
 function HandFlow({ store }) {
+  const { t } = useTranslation()
   const { game } = store
   const navigate = useNavigate()
   const [phase, setPhase] = useState('bid')
@@ -81,18 +83,15 @@ function HandFlow({ store }) {
           severity="info"
           action={
             <Button color="inherit" size="small" onClick={() => store.goToHand(currentIndex)}>
-              Return to current hand
+              {t('handPlay.returnToCurrent')}
             </Button>
           }
         >
-          Editing hand {handIndex + 1}. Changes re-total every later hand.
+          {t('handPlay.editingBanner', { n: handIndex + 1 })}
         </Alert>
       )}
       {dealerBidIllegal(hand) && (
-        <Alert severity="warning">
-          The dealer&apos;s bid here is no longer legal after an earlier edit. Re-open
-          the bids to fix it.
-        </Alert>
+        <Alert severity="warning">{t('handPlay.dealerBidIllegal')}</Alert>
       )}
       {phase === 'bid' && (
         <BidPhase
@@ -131,20 +130,17 @@ function HandFlow({ store }) {
       )}
 
       <Dialog open={endOpen} onClose={() => setEndOpen(false)}>
-        <DialogTitle>End the game now?</DialogTitle>
+        <DialogTitle>{t('handPlay.endGameDialogTitle')}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Standings are ranked from the hands played so far. This does not count
-            as a finished game.
-          </DialogContentText>
+          <DialogContentText>{t('handPlay.endGameDialogBody')}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEndOpen(false)}>Keep playing</Button>
+          <Button onClick={() => setEndOpen(false)}>{t('home.keepPlaying')}</Button>
           <Button
             color="error"
             onClick={() => store.endGameEarly()}
           >
-            End game
+            {t('handPlay.endGame')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -153,33 +149,37 @@ function HandFlow({ store }) {
 }
 
 function HandHeader({ game, hand, dealer, onEndEarly, onScoreboard }) {
+  const { t } = useTranslation()
   const order = hand.biddingOrder.map((id) => playerName(game, id)).join(' → ')
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
         <Typography variant="h6" component="h2">
-          Hand {hand.index + 1} / {game.hands.length}
+          {t('handPlay.handHeader', { n: hand.index + 1, total: game.hands.length })}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
           <Button size="small" color="inherit" onClick={onScoreboard}>
-            Scoreboard
+            {t('handPlay.scoreboardButton')}
           </Button>
           <Button size="small" color="inherit" onClick={onEndEarly}>
-            End game early
+            {t('handPlay.endGameEarly')}
           </Button>
         </Box>
       </Box>
       <Typography color="text.secondary">
-        {hand.cardsDealt} {hand.cardsDealt === 1 ? 'card' : 'cards'} ·{' '}
-        {hand.cardsDealt === 8 ? 'No trump' : 'Trump card turned'}
+        {t('handPlay.cards', { count: hand.cardsDealt })} ·{' '}
+        {hand.cardsDealt === 8 ? t('handPlay.noTrump') : t('handPlay.trumpCardTurned')}
       </Typography>
-      <Typography color="text.secondary">Dealer: {dealer ? dealer.name : '—'}</Typography>
-      <Typography color="text.secondary">Bidding: {order}</Typography>
+      <Typography color="text.secondary">
+        {t('handPlay.dealer', { name: dealer ? dealer.name : t('handPlay.dealerNone') })}
+      </Typography>
+      <Typography color="text.secondary">{t('handPlay.bidding', { order })}</Typography>
     </Paper>
   )
 }
 
 function BidPhase({ game, hand, store, onBack, onNext }) {
+  const { t } = useTranslation()
   const order = hand.biddingOrder
   const forbidden = forbiddenBid(hand)
   const complete = bidStepComplete(hand)
@@ -196,7 +196,7 @@ function BidPhase({ game, hand, store, onBack, onNext }) {
   return (
     <>
       <Typography component="h3" variant="subtitle1">
-        Enter each bid
+        {t('handPlay.enterBids')}
       </Typography>
       <Stack spacing={2}>
         {order.map((id, i) => {
@@ -211,17 +211,17 @@ function BidPhase({ game, hand, store, onBack, onNext }) {
             >
               <Typography variant="subtitle2" component="p" gutterBottom>
                 {playerName(game, id)}
-                {isDealer ? ' (dealer, bids last)' : ''}
+                {isDealer ? t('handPlay.dealerBidsLastSuffix') : ''}
               </Typography>
               <NumberPad
                 ref={(el) => {
                   padRefs.current[i] = el
                 }}
-                label={`Bid for ${playerName(game, id)}`}
+                label={t('handPlay.bidForAria', { name: playerName(game, id) })}
                 max={hand.cardsDealt}
                 value={hand.entries[id].bid}
                 disabledValue={isDealer ? forbidden : null}
-                helperText={`Bids sum to ${hand.cardsDealt} — not allowed`}
+                helperText={t('handPlay.bidsSumHelper', { n: hand.cardsDealt })}
                 onSelect={(n) => store.setBid(hand.index, id, n)}
               />
             </Paper>
@@ -231,7 +231,7 @@ function BidPhase({ game, hand, store, onBack, onNext }) {
       <BottomBar
         ref={nextRef}
         onBack={onBack}
-        nextLabel="Next"
+        nextLabel={t('common.next')}
         onNext={onNext}
         nextDisabled={!complete}
       />
@@ -240,6 +240,7 @@ function BidPhase({ game, hand, store, onBack, onNext }) {
 }
 
 function ResultPhase({ game, hand, store, onBack, onNext }) {
+  const { t } = useTranslation()
   const total = takenSoFar(hand)
   const complete = takenStepComplete(hand)
   const firstRef = useRef(null)
@@ -265,7 +266,7 @@ function ResultPhase({ game, hand, store, onBack, onNext }) {
   return (
     <>
       <Typography component="h3" variant="subtitle1">
-        Tricks taken
+        {t('handPlay.tricksTaken')}
       </Typography>
       <Stack spacing={2}>
         {game.players.map((p, i) => {
@@ -273,11 +274,11 @@ function ResultPhase({ game, hand, store, onBack, onNext }) {
           return (
             <Paper key={p.id} variant="outlined" sx={{ p: 1.5 }}>
               <Typography variant="subtitle2" component="p" gutterBottom>
-                {p.name} · bid {hand.entries[p.id].bid}
+                {t('handPlay.bidLine', { name: p.name, bid: hand.entries[p.id].bid })}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <IconButton
-                  aria-label={`One fewer trick for ${p.name}`}
+                  aria-label={t('handPlay.oneFewerTrick', { name: p.name })}
                   disabled={taken <= 0}
                   onClick={() => setTaken(p.id, taken - 1)}
                 >
@@ -288,7 +289,7 @@ function ResultPhase({ game, hand, store, onBack, onNext }) {
                 </Typography>
                 <IconButton
                   ref={i === 0 ? firstRef : undefined}
-                  aria-label={`One more trick for ${p.name}`}
+                  aria-label={t('handPlay.oneMoreTrick', { name: p.name })}
                   disabled={taken >= hand.cardsDealt}
                   onClick={() => setTaken(p.id, taken + 1)}
                 >
@@ -301,19 +302,19 @@ function ResultPhase({ game, hand, store, onBack, onNext }) {
       </Stack>
 
       <Typography color={complete ? 'success.main' : 'text.secondary'}>
-        {total} / {hand.cardsDealt} tricks accounted for
+        {t('handPlay.tricksAccounted', { taken: total, total: hand.cardsDealt })}
       </Typography>
 
       {hand.cardsDealt !== 8 && (
         <Box>
           <Typography variant="subtitle2" component="p" gutterBottom>
-            Trump suit (optional)
+            {t('handPlay.trumpSuitOptional')}
           </Typography>
           <ToggleButtonGroup
             exclusive
             value={hand.trump}
             onChange={(_, v) => store.setTrump(hand.index, v)}
-            aria-label="Trump suit"
+            aria-label={t('handPlay.trumpSuitAria')}
           >
             {SUITS.map((s) => (
               <ToggleButton key={s.value} value={s.value} aria-label={s.value} sx={{ minWidth: 48 }}>
@@ -324,12 +325,13 @@ function ResultPhase({ game, hand, store, onBack, onNext }) {
         </Box>
       )}
 
-      <BottomBar ref={nextRef} onBack={onBack} nextLabel="Next" onNext={onNext} nextDisabled={!complete} />
+      <BottomBar ref={nextRef} onBack={onBack} nextLabel={t('common.next')} onNext={onNext} nextDisabled={!complete} />
     </>
   )
 }
 
 function SummaryPhase({ game, handIndex, onBack, onNext, isLastHand }) {
+  const { t } = useTranslation()
   const { rows, totals, bonuses } = handSummary(game, handIndex)
   const nextRef = useRef(null)
   useEffect(() => {
@@ -339,30 +341,39 @@ function SummaryPhase({ game, handIndex, onBack, onNext, isLastHand }) {
   return (
     <>
       <Typography component="h3" variant="subtitle1">
-        Hand {handIndex + 1} summary
+        {t('handPlay.handSummary', { n: handIndex + 1 })}
       </Typography>
       <Stack spacing={1.5}>
         {rows.map((row) => (
           <Paper key={row.playerId} variant="outlined" sx={{ p: 1.5 }}>
             <Typography variant="subtitle2" component="p">{playerName(game, row.playerId)}</Typography>
             <Typography color="text.secondary">
-              Bid {row.bid}, took {row.taken} — {OUTCOME_LABEL[row.outcome]} ·{' '}
-              {row.points >= 0 ? `+${row.points}` : row.points} points
+              {t('handPlay.summaryLine', {
+                bid: row.bid,
+                taken: row.taken,
+                outcome: t(OUTCOME_KEY[row.outcome]),
+                points: row.points >= 0 ? `+${row.points}` : row.points,
+              })}
             </Typography>
             {bonuses[row.playerId] != null && (
               <Typography color={bonuses[row.playerId] > 0 ? 'success.main' : 'error.main'}>
-                Promotion! {bonuses[row.playerId] > 0 ? '+10' : '−10'} —{' '}
-                {bonuses[row.playerId] > 0 ? '5 made in a row' : '5 missed in a row'}
+                {t('handPlay.promotion', {
+                  delta: bonuses[row.playerId] > 0 ? '+10' : '−10',
+                  reason:
+                    bonuses[row.playerId] > 0
+                      ? t('handPlay.promotionMadeReason')
+                      : t('handPlay.promotionMissedReason'),
+                })}
               </Typography>
             )}
-            <Typography variant="body2">Total: {totals[row.playerId]}</Typography>
+            <Typography variant="body2">{t('handPlay.totalLine', { total: totals[row.playerId] })}</Typography>
           </Paper>
         ))}
       </Stack>
       <BottomBar
         ref={nextRef}
         onBack={onBack}
-        nextLabel={isLastHand ? 'Finish game' : 'Next hand'}
+        nextLabel={isLastHand ? t('handPlay.finishGame') : t('handPlay.nextHand')}
         onNext={onNext}
       />
     </>

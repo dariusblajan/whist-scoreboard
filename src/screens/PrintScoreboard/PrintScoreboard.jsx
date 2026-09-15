@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 import { useGameStore } from '../../state/useGameStore.js'
 import { printSheetModel } from '../../print/printSheetModel.js'
+import { useTranslation } from '../../i18n/useTranslation.js'
+import { INTL_TAG } from '../../i18n/resources.js'
 import './print.css'
 
 const VARIANTS = ['short', 'long']
@@ -25,41 +27,51 @@ function configFromParams(params) {
  * browser's Print dialog only ever sees the sheet itself.
  */
 export function PrintScoreboard() {
+  const { t, locale } = useTranslation()
   const { game } = useGameStore()
   const [searchParams] = useSearchParams()
 
   const model = useMemo(() => {
     const config = configFromParams(searchParams)
-    if (config) return printSheetModel({ config })
+    if (config) {
+      return printSheetModel({
+        config: { ...config, playerLabel: (n) => t('newGame.playerLabel', { n }) },
+      })
+    }
     return game ? printSheetModel({ game }) : null
-  }, [game, searchParams])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game, searchParams, locale])
 
   if (!model) return <Navigate to="/" replace />
 
-  const { title, meta, players, rows, totals, standings } = model
+  const { meta, players, rows, totals, standings } = model
   const condensed = players.length >= 6
-  const date = new Date().toLocaleDateString()
+  const date = new Intl.DateTimeFormat(INTL_TAG[locale]).format(new Date())
 
   return (
     <div className={condensed ? 'print-sheet print-sheet--condensed' : 'print-sheet'}>
       <div className="print-sheet__toolbar">
         <button type="button" onClick={() => window.print()}>
-          Print / Save as PDF
+          {t('print.printSave')}
         </button>
       </div>
 
-      <h1 className="print-sheet__title">{title}</h1>
+      <h1 className="print-sheet__title">{t('print.title')}</h1>
       <p className="print-sheet__meta">
-        {date} · {meta.variant === 'short' ? 'Short' : 'Long'} variant · {meta.playerCount} players
-        · Promotions {meta.promotions ? 'on' : 'off'}
+        {t('print.meta', {
+          date,
+          variant: meta.variant === 'short' ? t('print.variantShort') : t('print.variantLong'),
+          count: meta.playerCount,
+          state: meta.promotions ? t('common.on') : t('common.off'),
+        })}
       </p>
 
-      <table className="print-sheet__table" aria-label="Score sheet">
+      <table className="print-sheet__table" aria-label={t('print.tableAria')}>
         <thead>
           <tr>
-            <th scope="col">Hand</th>
-            <th scope="col">Cards</th>
-            <th scope="col">Dealer</th>
+            <th scope="col">{t('print.handHeader')}</th>
+            <th scope="col">{t('print.cardsHeader')}</th>
+            <th scope="col">{t('print.dealerHeader')}</th>
             {players.map((p) => (
               <th key={p.id} scope="col" colSpan={2}>
                 {p.name}
@@ -72,10 +84,10 @@ export function PrintScoreboard() {
             <th scope="col" aria-hidden="true" />
             {players.map((p) => [
               <th key={`${p.id}-bid`} scope="col">
-                Bid
+                {t('print.bidHeader')}
               </th>,
               <th key={`${p.id}-score`} scope="col">
-                Score
+                {t('print.scoreHeader')}
               </th>,
             ])}
           </tr>
@@ -104,7 +116,7 @@ export function PrintScoreboard() {
         {totals && (
           <tfoot>
             <tr>
-              <td colSpan={3}>Total</td>
+              <td colSpan={3}>{t('print.totalRow')}</td>
               {players.map((p) => (
                 <td key={p.id} colSpan={2}>
                   {totals[p.id]}
@@ -117,13 +129,17 @@ export function PrintScoreboard() {
 
       {standings && (
         <div className="print-sheet__standings">
-          <h2>Final standings</h2>
+          <h2>{t('print.finalStandings')}</h2>
           <ol>
             {[...standings]
               .sort((a, b) => a.rank - b.rank)
               .map((s) => (
                 <li key={s.playerId}>
-                  {s.rank}. {players.find((p) => p.id === s.playerId)?.name} — {s.total}
+                  {t('print.standingLine', {
+                    rank: s.rank,
+                    name: players.find((p) => p.id === s.playerId)?.name,
+                    total: s.total,
+                  })}
                 </li>
               ))}
           </ol>
