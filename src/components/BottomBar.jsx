@@ -13,6 +13,7 @@ export const BottomBar = forwardRef(function BottomBar(
 ) {
   return (
     <Box
+      className="no-print"
       sx={{
         position: 'sticky',
         bottom: 0,

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import ToggleButton from '@mui/material/ToggleButton'
@@ -199,6 +199,15 @@ export function NewGame() {
             variant="outlined"
           >
             Randomize
+          </Button>
+          <Button
+            component={Link}
+            to={`/print?players=${playerCount}&variant=${variant}&promotions=${promotions ? 1 : 0}`}
+            target="_blank"
+            rel="noopener"
+            variant="outlined"
+          >
+            Print blank sheet
           </Button>
           <Stack spacing={1}>
             {roster.map((p, i) => (

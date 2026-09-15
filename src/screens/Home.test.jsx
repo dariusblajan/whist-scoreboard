@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { buildGame, makeConfig, renderApp, seedGame } from '../test/utils.jsx'
-import { loadStats } from '../state/persistence.js'
+import { loadGame, loadStats } from '../state/persistence.js'
 
 describe('Home', () => {
   it('offers only New game when there is no stored game', () => {
@@ -48,6 +48,31 @@ describe('Home', () => {
     await user.click(screen.getByRole('button', { name: /new game/i }))
     await user.click(screen.getByRole('button', { name: /discard and start new/i }))
     expect(screen.getByRole('heading', { name: /new game/i, level: 2 })).toBeInTheDocument()
+  })
+
+  it('offers to view a finished game and guards New game behind a lighter confirmation', async () => {
+    const user = userEvent.setup()
+    const game = buildGame(makeConfig())
+    game.status = 'complete'
+    seedGame(game, { gamesPlayed: 1, gamesFinished: 1 })
+    renderApp({ route: '/' })
+
+    expect(screen.getByRole('link', { name: /view last game/i })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /resume/i })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /new game/i }))
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveTextContent(/start a new game/i)
+    expect(dialog).toHaveTextContent(/clears the finished game/i)
+
+    // Cancel is a no-op — still on Home, last game still viewable.
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+    expect(await screen.findByRole('link', { name: /view last game/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /new game/i }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'New game' }))
+    expect(screen.getByRole('heading', { name: /new game/i, level: 2 })).toBeInTheDocument()
+    expect(loadGame()).toBeNull()
   })
 
   it('starting a new game increments gamesPlayed in persisted stats', async () => {

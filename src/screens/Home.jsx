@@ -15,9 +15,13 @@ export function Home() {
   const { game, stats, discardGame } = useGameStore()
   const navigate = useNavigate()
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const hasActiveGame = Boolean(game && game.status === 'active')
-  const firstRun = !hasActiveGame && stats.gamesPlayed === 0 && stats.gamesFinished === 0
+  const isActive = Boolean(game && game.status === 'active')
+  const isFinished = Boolean(game && game.status === 'complete')
+  const firstRun = !game && stats.gamesPlayed === 0 && stats.gamesFinished === 0
 
+  // Whichever kind of saved game this is, "New game" always discards it first —
+  // a finished game left un-discarded would otherwise leak into the next
+  // wizard's blank-sheet preview and the Home screen alike.
   const startNew = () => {
     discardGame()
     setConfirmOpen(false)
@@ -45,7 +49,7 @@ export function Home() {
         </Stack>
       )}
 
-      {hasActiveGame ? (
+      {isActive && (
         <Stack spacing={1.5}>
           <Button component={RouterLink} to="/play" variant="contained" size="large">
             Resume game
@@ -57,7 +61,20 @@ export function Home() {
             New game
           </Button>
         </Stack>
-      ) : (
+      )}
+
+      {isFinished && (
+        <Stack spacing={1.5}>
+          <Button component={RouterLink} to="/over" variant="contained" size="large">
+            View last game
+          </Button>
+          <Button onClick={() => setConfirmOpen(true)} size="large">
+            New game
+          </Button>
+        </Stack>
+      )}
+
+      {!isActive && !isFinished && (
         <Button component={RouterLink} to="/new" variant="contained" size="large">
           New game
         </Button>
@@ -66,16 +83,20 @@ export function Home() {
       <InstallButton />
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Discard the game in progress?</DialogTitle>
+        <DialogTitle>{isActive ? 'Discard the game in progress?' : 'Start a new game?'}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Starting a new game deletes the current one. This cannot be undone.
+            {isActive
+              ? 'Starting a new game deletes the current one. This cannot be undone.'
+              : 'This clears the finished game from the scoreboard.'}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Keep playing</Button>
+          <Button onClick={() => setConfirmOpen(false)}>
+            {isActive ? 'Keep playing' : 'Cancel'}
+          </Button>
           <Button onClick={startNew} color="error">
-            Discard and start new
+            {isActive ? 'Discard and start new' : 'New game'}
           </Button>
         </DialogActions>
       </Dialog>

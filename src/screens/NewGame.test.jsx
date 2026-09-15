@@ -77,6 +77,15 @@ describe('NewGame wizard', () => {
     expect(container.querySelector(banned)).toBeNull() // step 4
   })
 
+  it('Print blank sheet links to /print with the chosen player count and variant', async () => {
+    const user = userEvent.setup()
+    renderApp({ route: '/new' })
+    await stepThrough(user, { count: 5, variant: 'long' })
+    const link = screen.getByRole('link', { name: 'Print blank sheet' })
+    expect(link).toHaveAttribute('href', '/print?players=5&variant=long&promotions=0')
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
   it('randomize keeps the same set of seats', async () => {
     const user = userEvent.setup()
     renderApp({ route: '/new' })

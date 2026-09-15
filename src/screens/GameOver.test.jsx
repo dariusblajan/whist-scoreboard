@@ -51,4 +51,13 @@ describe('GameOver', () => {
     renderApp({ route: '/over' })
     expect(loadStats().gamesFinished).toBe(1)
   })
+
+  it('Print / Save as PDF opens the print sheet with final standings', async () => {
+    const user = userEvent.setup()
+    seedFinished([{ p0: [1, 1], p1: [0, 0], p2: [0, 0] }])
+    renderApp({ route: '/over' })
+    await user.click(screen.getByRole('button', { name: 'Print / Save as PDF' }))
+    expect(screen.getByRole('table', { name: 'Score sheet' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Final standings' })).toBeInTheDocument()
+  })
 })
