@@ -8,8 +8,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 const BASE = '/whist-scoreboard/'
 
 // Splash background — keep in sync with scripts/generate-icons.mjs.
-const BACKGROUND_COLOR = '#16171d'
-const THEME_COLOR = '#00ADB5'
+const BACKGROUND_COLOR = '#191527'
+const THEME_COLOR = '#7C5CFA'
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({

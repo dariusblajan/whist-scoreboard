@@ -14,7 +14,13 @@ export function AppLayout() {
   const { t } = useTranslation()
   return (
     <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <AppBar position="sticky" color="primary" enableColorOnDark className="no-print">
+      <AppBar
+        position="sticky"
+        color="primary"
+        enableColorOnDark
+        className="no-print"
+        sx={{ borderRadius: '0 0 20px 20px' }}
+      >
         <Toolbar>
           <Box
             component="img"

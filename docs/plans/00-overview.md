@@ -25,11 +25,8 @@ and `mdi-material-ui` (icons). No test runner, router, or PWA plugin yet.
 | [`05-pwa-shell.md`](05-pwa-shell.md) | M4 | Manifest, service worker, offline, installable, icons |
 | [`06-polish.md`](06-polish.md) | M5 | Wake lock, responsive pass, theme toggle, empty/error states, a11y |
 | [`07-print-scoreboard.md`](07-print-scoreboard.md) | M6 *(planned)* | Printable / save-as-PDF score sheet — blank or filled — via print CSS, no backend |
-| [`08-internationalization.md`](08-internationalization.md) | M7 *(planned)* | Translatable UI + English & Romanian; language switcher; no other languages in v1 |
-
-Iterations 07 and 08 are **scoped but not yet scheduled for implementation** —
-included here so earlier work keeps strings centralizable and the scoreboard
-layout print-friendly.
+| [`08-internationalization.md`](08-internationalization.md) | M7 | Translatable UI + English & Romanian; language switcher; no other languages in v1 |
+| [`09-design-refresh.md`](09-design-refresh.md) | M8 | Design language refresh — "Playful Trick-Taking" theme (palette, type, shape, table contrast) |
 
 ## Cross-cutting conventions
 
