@@ -14,6 +14,11 @@ import { useGameStore } from '../state/useGameStore.js'
 import { scoreboardRows } from '../state/selectors.js'
 import { useTranslation } from '../i18n/useTranslation.js'
 
+// Just a width *hint* for the auto table layout (see the colgroup comment
+// below) — the "Cards" column only ever holds 1-2 digits, so it doesn't need
+// an even share.
+const CARDS_COL_PCT = 10
+
 const PINNED = {
   position: 'sticky',
   left: 0,
@@ -54,17 +59,39 @@ export function Scoreboard() {
         </Stack>
       </Box>
 
-      <Box sx={{ overflowX: 'auto', maxHeight: '70dvh', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+      <Box sx={{ overflowX: 'auto', maxHeight: '70dvh', border: 1.5, borderColor: 'divider', borderRadius: 1 }}>
         <Table size="small" stickyHeader aria-label={t('scoreboard.tableAria')}>
+          {/*
+            Equal-share width hints so that on a wide screen — where the
+            table's natural (content-driven) width is less than the
+            available space — the browser spreads the surplus evenly across
+            every column instead of dumping it into one. `table-layout` stays
+            `auto` (the default), so these remain hints: on a narrow phone,
+            where content can't shrink that far, columns still overflow into
+            the horizontal scroll exactly as before.
+          */}
+          <colgroup>
+            <col style={{ width: `${CARDS_COL_PCT}%` }} />
+            {game.players.map((p) => (
+              <col
+                key={`${p.id}-cg`}
+                span={2}
+                style={{ width: `${(100 - CARDS_COL_PCT) / game.players.length}%` }}
+              />
+            ))}
+          </colgroup>
           <TableHead>
             <TableRow>
               <TableCell sx={{ ...PINNED, zIndex: 4 }}>{t('scoreboard.cardsHeader')}</TableCell>
-              {game.players.map((p) => (
+              {game.players.map((p, i) => (
                 <TableCell
                   key={p.id}
                   align="center"
                   colSpan={2}
-                  sx={{ fontWeight: leaders.has(p.id) ? 700 : 400 }}
+                  sx={{
+                    fontWeight: leaders.has(p.id) ? 700 : 400,
+                    ...(i > 0 && { borderLeft: 1, borderLeftColor: 'divider' }),
+                  }}
                 >
                   {p.name}
                   {leaders.has(p.id) ? t('scoreboard.leaderSuffix') : ''}
@@ -72,12 +99,25 @@ export function Scoreboard() {
               ))}
             </TableRow>
             <TableRow>
-              <TableCell component="td" aria-hidden sx={{ ...PINNED, top: '2rem', zIndex: 4 }} />
-              {game.players.map((p) => [
-                <TableCell key={`${p.id}-b`} align="center" sx={{ top: '2rem' }}>
+              <TableCell
+                component="td"
+                aria-hidden
+                sx={{ ...PINNED, top: '2rem', zIndex: 4, borderBottom: 2, borderBottomColor: 'divider' }}
+              />
+              {game.players.map((p, i) => [
+                <TableCell
+                  key={`${p.id}-b`}
+                  align="center"
+                  sx={{
+                    top: '2rem',
+                    borderBottom: 2,
+                    borderBottomColor: 'divider',
+                    ...(i > 0 && { borderLeft: 1, borderLeftColor: 'divider' }),
+                  }}
+                >
                   {t('scoreboard.bidHeader')}
                 </TableCell>,
-                <TableCell key={`${p.id}-s`} align="center" sx={{ top: '2rem' }}>
+                <TableCell key={`${p.id}-s`} align="center" sx={{ top: '2rem', borderBottom: 2, borderBottomColor: 'divider' }}>
                   {t('scoreboard.scoreHeader')}
                 </TableCell>,
               ])}
@@ -97,10 +137,14 @@ export function Scoreboard() {
                 data-testid={`hand-row-${row.handIndex}`}
               >
                 <TableCell sx={PINNED}>{row.cardsDealt}</TableCell>
-                {game.players.map((p) => {
+                {game.players.map((p, i) => {
                   const cell = row.cells[p.id]
                   return [
-                    <TableCell key={`${p.id}-b`} align="center">
+                    <TableCell
+                      key={`${p.id}-b`}
+                      align="center"
+                      sx={i > 0 ? { borderLeft: 1, borderLeftColor: 'divider' } : undefined}
+                    >
                       {cell.bid ?? ''}
                     </TableCell>,
                     <TableCell key={`${p.id}-s`} align="center">
@@ -122,8 +166,10 @@ export function Scoreboard() {
 
           <TableFooter>
             <TableRow>
-              <TableCell sx={{ ...PINNED, bottom: 0, zIndex: 4 }}>{t('scoreboard.totalRow')}</TableCell>
-              {game.players.map((p) => (
+              <TableCell sx={{ ...PINNED, bottom: 0, zIndex: 4, borderTop: 2, borderTopColor: 'divider' }}>
+                {t('scoreboard.totalRow')}
+              </TableCell>
+              {game.players.map((p, i) => (
                 <TableCell
                   key={p.id}
                   align="center"
@@ -133,6 +179,9 @@ export function Scoreboard() {
                     bottom: 0,
                     bgcolor: 'background.paper',
                     fontWeight: 700,
+                    borderTop: 2,
+                    borderTopColor: 'divider',
+                    ...(i > 0 && { borderLeft: 1, borderLeftColor: 'divider' }),
                     color: leaders.has(p.id) ? 'primary.main' : 'text.primary',
                   }}
                 >

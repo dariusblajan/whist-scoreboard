@@ -14,7 +14,7 @@ const SRC = path.join(root, 'src/assets/logo.png')
 const OUT = path.join(root, 'public')
 
 // Keep in sync with the manifest `background_color` in vite.config.js.
-const BACKGROUND = '#16171d'
+const BACKGROUND = '#191527'
 
 /** Plain contain-resize onto a transparent square. */
 async function resize(size, file) {
